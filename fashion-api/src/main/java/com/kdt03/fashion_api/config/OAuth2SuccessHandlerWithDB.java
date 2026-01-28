@@ -46,6 +46,7 @@ public class OAuth2SuccessHandlerWithDB extends OAuth2SuccessHandler {
         String token = jwtUtil.getJWT(username); // JWT 생성
         sendJWTtoClient(response, token);
         // response.sendRedirect("/test-page");
-        response.sendRedirect("/test-page?token=" + token);
+        response.sendRedirect("http://localhost:8080/?token=" + token); 
+
     }
 }

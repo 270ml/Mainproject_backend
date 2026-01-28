@@ -33,7 +33,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         
      
         // response.sendRedirect("http://localhost:8080/?token=" + token); 
-        response.sendRedirect("http://localhost:8080/?token=" + token);
+        // response.sendRedirect("http://localhost:8080/?token=" + token);
     } catch (Exception e) {
         e.printStackTrace(); 
     }
