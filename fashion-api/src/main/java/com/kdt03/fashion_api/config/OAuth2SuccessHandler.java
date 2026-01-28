@@ -2,7 +2,6 @@ package com.kdt03.fashion_api.config;
 
 import java.util.Map;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -29,7 +28,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     void sendJWTtoClient(HttpServletResponse response, String token) {
-        System.out.println("[OAuth2SuccessHandler]token:" + token);
-        response.addHeader(HttpHeaders.AUTHORIZATION, token);
+    try {
+        System.out.println("[OAuth2SuccessHandler]token:" + token); 
+        
+     
+        // response.sendRedirect("http://localhost:8080/?token=" + token); 
+        response.sendRedirect("http://localhost:8080/?token=" + token);
+    } catch (Exception e) {
+        e.printStackTrace(); 
     }
+}
 }
