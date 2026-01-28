@@ -16,32 +16,37 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String provider = oAuth2Token.getAuthorizedClientRegistrationId();
         OAuth2User user = (OAuth2User) oAuth2Token.getPrincipal();
 
-        String email = "unknown";
+        String id = "unknown";
         String name = "unknown";
         String profile = "unknown";
 
         if (provider.equalsIgnoreCase("naver")) {
             Map<String, Object> response = (Map<String, Object>) user.getAttribute("response");
-            System.out.println("Naver response: " + response);
             if (response != null) {
-                email = response.get("email") != null ? response.get("email").toString() : "unknown";
+                id = response.get("id") != null ? response.get("id").toString() : "unknown";
                 name = response.get("nickname") != null ? response.get("nickname").toString() : 
                     (response.get("name") != null ? response.get("name").toString() : "unknown");
-                profile = response.get("profile_image") != null ? response.get("profile_image").toString() : "";
+                profile = response.get("profile_image") != null ? response.get("profile_image").toString() : "no_image";
             }
         } else if (provider.equalsIgnoreCase("google")) {
-            email = (String) user.getAttributes().get("email");
-            name = (String) user.getAttributes().get("name"); // 구글은 name
+            id = (String) user.getAttributes().get("sub");
+            name = (String) user.getAttributes().get("name");
             profile = (String) user.getAttributes().get("picture");
+        } else if (provider.equalsIgnoreCase("kakao")) {
+            Map<String, Object> account = (Map<String, Object>) user.getAttributes().get("kakao_account");
+            Map<String, Object> account_profile = (Map<String, Object>) account.get("profile");
+            id = (String) user.getAttributes().get("id").toString();
+            if(account != null && account_profile != null) {
+                name = account_profile.get("nickname").toString();
+                profile = account_profile.get("profile_image_url").toString();
+            }
         }
-
-        return Map.of("provider", provider, "email", email, "name", name, "picture", profile);
+        return Map.of("provider", provider, "id", id, "name", name, "profile", profile);
     }
 
     void sendJWTtoClient(HttpServletResponse response, String token) {
         try {
             System.out.println("[OAuth2SuccessHandler]token:" + token);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
