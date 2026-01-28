@@ -15,4 +15,5 @@ public class MemberDTO {
     private String id;
     private String nickname;
     private String provider;
+    private String profile;
 }

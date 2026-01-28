@@ -10,7 +10,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import jakarta.servlet.http.HttpServletResponse;
 
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-    // OAuth2 인증정보에서필요한정보(provider, email)을추출하는메서드
     @SuppressWarnings("unchecked")
     Map<String, String> getUserInfo(Authentication authentication) {
         OAuth2AuthenticationToken oAuth2Token = (OAuth2AuthenticationToken) authentication;
@@ -18,19 +17,24 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         OAuth2User user = (OAuth2User) oAuth2Token.getPrincipal();
 
         String email = "unknown";
-        String name = "unknown"; // 예.. 이름을 담을 주머니를 만듭니다..
+        String name = "unknown";
+        String profile = "unknown";
 
         if (provider.equalsIgnoreCase("naver")) {
             Map<String, Object> response = (Map<String, Object>) user.getAttribute("response");
-            email = (String) response.get("email");
-            name = (String) response.get("nickname"); // 네이버는 보통 nickname
+            if (response != null) {
+                email = response.get("id") != null ? response.get("id").toString() : "unknown";
+                name = response.get("nickname") != null ? response.get("nickname").toString() : 
+                    (response.get("name") != null ? response.get("name").toString() : "Guest");
+                profile = response.get("profile_image") != null ? response.get("profile_image").toString() : "";
+            }
         } else if (provider.equalsIgnoreCase("google")) {
             email = (String) user.getAttributes().get("email");
             name = (String) user.getAttributes().get("name"); // 구글은 name
+            profile = (String) user.getAttributes().get("picture");
         }
 
-        
-        return Map.of("provider", provider, "email", email, "name", name);
+        return Map.of("provider", provider, "email", email, "name", name, "picture", profile);
     }
 
     void sendJWTtoClient(HttpServletResponse response, String token) {

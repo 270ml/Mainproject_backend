@@ -37,11 +37,13 @@ public class OAuth2SuccessHandlerWithDB extends OAuth2SuccessHandler {
     @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         Map<String, String> map = getUserInfo(authentication);
-        String username = map.get("provider") + "_"+ map.get("email");
+        String username = map.get("provider") + "_" + map.get("email");
+
         memRepo.save(Member.builder().id(username)
         .password(encoder.encode("1a2s3d4f"))
         .nickname(map.get("name"))
         .provider(map.get("provider"))
+        .profile(map.get("picture"))
         .build());
         String token = jwtUtil.getJWT(username); // JWT 생성
         sendJWTtoClient(response, token);
