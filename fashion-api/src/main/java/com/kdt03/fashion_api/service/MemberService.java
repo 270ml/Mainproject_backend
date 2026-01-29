@@ -22,11 +22,12 @@ public class MemberService {
         String encoded = passwordEncoder.encode(raw);
 
         Member member = Member.builder().id(dto.getId()).nickname(dto.getNickname()).password(encoded)
-                .provider(dto.getProvider()).build();
+                .provider("local").build();
 
         memberRepo.save(member);
     }
-    //로그인
+
+    // 로그인
     public Member login(MemberLoginDTO dto) {
         Member member = memberRepo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("가입되지 않은 회원입니다."));

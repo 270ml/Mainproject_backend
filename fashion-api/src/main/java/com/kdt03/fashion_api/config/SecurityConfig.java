@@ -30,21 +30,37 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+            com.kdt03.fashion_api.repository.MemberRepository memberRepo,
+            com.kdt03.fashion_api.util.JWTUtil jwtUtil) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/logout").permitAll()
                         .anyRequest().permitAll())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable());
-        http.oauth2Login(oauth2->oauth2.successHandler(oauth2SuccessHandler));    
+
+        // OAuth2 로그인 설정
+        http.oauth2Login(oauth2 -> oauth2.successHandler(oauth2SuccessHandler));
+
+        // 로그아웃 설정
+        http.logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(org.springframework.http.HttpStatus.OK.value());
+                }));
+
+        // JWT 필터
+        http.addFilterBefore(new com.kdt03.fashion_api.config.filter.JWTAuthorizationFilter(memberRepo, jwtUtil),
+                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     private CorsConfigurationSource corsSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000")); // 프론트엔드 도메인
-                                                                                                          // 추가
+        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
         config.addAllowedMethod(CorsConfiguration.ALL);
         config.addAllowedHeader(CorsConfiguration.ALL);
         config.setAllowCredentials(true);
@@ -55,5 +71,4 @@ public class SecurityConfig {
         return source;
     }
 
-    
 }
