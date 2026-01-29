@@ -50,7 +50,7 @@ public class MemberController {
             String profile = member.getProfile();
             String profilepath;
             if (profile == null || profile.isEmpty()) {
-                profilepath = "http://10.125.121.182:8080/default-avatar.png"; //디폴트 이미지인데 뭘로 보낼지는 프론트랑 의논후
+                profilepath = "http://10.125.121.182:8080/default-avatar.png"; // 디폴트 이미지인데 뭘로 보낼지는 프론트랑 의논후
             } else {
                 profilepath = "http://10.125.121.182:8080" + profile;
             }
@@ -66,6 +66,12 @@ public class MemberController {
 
             return ResponseEntity.status(401).body(errorResponse);
         }
+    }
+
+    @io.swagger.v3.oas.annotations.Operation(description = "서버 세션을 무효화하고 로그아웃 처리.")
+    @PostMapping("/logout")
+    public void logout() {
+        // SecurityConfig에서 처리
     }
 
 }

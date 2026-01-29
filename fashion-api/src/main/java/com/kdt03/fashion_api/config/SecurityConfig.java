@@ -36,7 +36,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/logout").permitAll()
+                        .requestMatchers("/api/members/logout").permitAll()
                         .anyRequest().permitAll())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable());
@@ -46,7 +46,7 @@ public class SecurityConfig {
 
         // 로그아웃 설정
         http.logout(logout -> logout
-                .logoutUrl("/logout")
+                .logoutUrl("/api/members/logout")
                 .logoutSuccessHandler((request, response, authentication) -> {
                     response.setStatus(org.springframework.http.HttpStatus.OK.value());
                 }));
