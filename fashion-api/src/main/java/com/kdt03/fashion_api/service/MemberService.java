@@ -31,11 +31,11 @@ public class MemberService {
         Member member = memberRepo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("가입되지 않은 회원입니다."));
 
-
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
             throw new RuntimeException("비밀번호가 다릅니다.");
         }
 
         return "로그인 성공";
     }
+
 }

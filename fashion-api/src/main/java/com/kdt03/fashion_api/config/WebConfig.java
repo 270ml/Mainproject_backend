@@ -15,11 +15,19 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:///C:/workspace_fashion/uploads/");
      registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:///C:/clothimage/");
+                
     } 
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
 
         registry.addViewController("/product-list").setViewName("productList");
+
+        registry.addViewController("/test-page").setViewName("uploadTest");
+
+        registry.addViewController("/profile_test").setViewName("profile_test");
+    
     }
+
+
 } 

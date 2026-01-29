@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ImageUploadController {
 
     private final ImageUploadService imageUploadService;
+    private final String SERVER_URL = "http://10.125.121.182:8080";
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
@@ -31,12 +32,11 @@ public class ImageUploadController {
 
         try {
             String savedFilename = imageUploadService.uploadImage(file);
-            
 
             response.put("success", true);
             response.put("fileName", savedFilename);
             response.put("message", "업로드 성공");
-            response.put("imageUrl", "http://10.125.121.182:8080/uploads/" + savedFilename);
+            response.put("imageUrl", SERVER_URL + "/uploads/" + savedFilename);
             return ResponseEntity.ok(response);
 
         } catch (IOException e) {
@@ -47,4 +47,29 @@ public class ImageUploadController {
         }
     }
 
+    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadProfile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("id") String id) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String savedPath = imageUploadService.uploadProfileImage(file, id);
+
+            response.put("success", true);
+            response.put("fileName", savedPath);
+            response.put("imageUrl", SERVER_URL + "/uploads/" + savedPath);
+            response.put("message", "업로드 성공");
+
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "서버 오류");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    
 }
