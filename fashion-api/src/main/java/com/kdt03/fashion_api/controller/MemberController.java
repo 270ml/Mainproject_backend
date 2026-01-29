@@ -27,6 +27,7 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepo;
     private final JWTUtil jwtUtil;
+
     
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody MemberSignupDTO dto) {
@@ -39,14 +40,18 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody MemberLoginDTO dto) {
         try {
+            Member member = memberService.login(dto);
             memberService.login(dto);
             String token = jwtUtil.getJWT(dto.getId());
-            
+
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("accessToken", token);
             response.put("userId", dto.getId());
+            String profilepath = "http://10.125.121.182:8080/"+ member.getProfile();
+            response.put("profile", profilepath);
+            response.put("name", member.getNickname());
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {

@@ -26,8 +26,8 @@ public class MemberService {
 
         memberRepo.save(member);
     }
-
-    public String login(MemberLoginDTO dto) {
+    //로그인
+    public Member login(MemberLoginDTO dto) {
         Member member = memberRepo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("가입되지 않은 회원입니다."));
 
@@ -35,7 +35,7 @@ public class MemberService {
             throw new RuntimeException("비밀번호가 다릅니다.");
         }
 
-        return "로그인 성공";
+        return member;
     }
 
 }
