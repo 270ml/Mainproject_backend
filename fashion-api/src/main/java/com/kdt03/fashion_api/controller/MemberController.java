@@ -56,7 +56,9 @@ public class MemberController {
             String profile = member.getProfile();
             String profilepath;
             if (profile == null || profile.isEmpty()) {
-                profilepath = "http://10.125.121.182:8080/default-avatar.png"; // 디폴트 이미지인데 뭘로 보낼지는 프론트랑 의논후
+                profilepath = "http://10.125.121.182:8080/uploads/profiles/default-avatar.png"; // 디폴트 이미지인데 뭘로 보낼지는
+                                                                                                // 프론트랑
+                                                                                                // 의논후
             } else {
                 profilepath = "http://10.125.121.182:8080" + profile;
             }
