@@ -7,6 +7,7 @@ import com.kdt03.fashion_api.domain.Member;
 import com.kdt03.fashion_api.domain.dto.MemberLoginDTO;
 import com.kdt03.fashion_api.domain.dto.MemberSignupDTO;
 import com.kdt03.fashion_api.repository.MemberRepository;
+import com.kdt03.fashion_api.domain.dto.MemberResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +38,25 @@ public class MemberService {
         }
 
         return member;
+    }
+
+    // 전체 회원 조회 (테스트용)
+    public java.util.List<MemberResponseDTO> getAllMembers() {
+        return memberRepo.findAll().stream().map(member -> {
+            String profile = member.getProfile();
+            // Provider가 "local"이거나 null일 경우
+            if ("local".equals(member.getProvider()) || member.getProvider() == null) {
+                if (profile != null && !profile.startsWith("http")) { // 이미
+                    profile = "http://10.125.121.182:8080" + profile;
+                }
+            }
+            return MemberResponseDTO.builder()
+                    .id(member.getId())
+                    .nickname(member.getNickname())
+                    .provider(member.getProvider())
+                    .profile(profile)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
     }
 
 }

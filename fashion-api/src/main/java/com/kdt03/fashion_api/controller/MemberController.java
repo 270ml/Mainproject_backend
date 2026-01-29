@@ -13,6 +13,7 @@ import com.kdt03.fashion_api.util.JWTUtil;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -34,6 +35,11 @@ public class MemberController {
         memberService.signup(dto);
         return ResponseEntity.ok("회원가입 성공");
 
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<java.util.List<com.kdt03.fashion_api.domain.dto.MemberResponseDTO>> getAllMembers() {
+        return ResponseEntity.ok(memberService.getAllMembers());
     }
 
     @PostMapping("/login")
