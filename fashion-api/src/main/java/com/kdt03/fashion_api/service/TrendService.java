@@ -8,6 +8,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -78,11 +80,17 @@ public class TrendService {
             headers.set("X-Naver-Client-Secret", CLIENT_SECRET);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
+            LocalDate endDate = LocalDate.now();
+            LocalDate startDate = endDate.minusMonths(12);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
             Map<String, Object> body = new HashMap<>();
-            body.put("startDate", "2026-01-01");
-            body.put("endDate", "2026-02-04");
-            body.put("timeUnit", "week");
+            body.put("startDate", startDate.format(formatter));
+            body.put("endDate", endDate.format(formatter));
+            body.put("timeUnit", "month");
             body.put("category", "50000000");
+            body.put("gender", "f");
+            body.put("ages", Arrays.asList("40", "50"));
 
             List<Map<String, Object>> keywordsList = new ArrayList<>();
             if (includeModern)
