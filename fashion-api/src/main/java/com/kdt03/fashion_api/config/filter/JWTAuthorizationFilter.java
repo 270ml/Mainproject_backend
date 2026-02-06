@@ -41,7 +41,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String username = new JWTUtil().getClaim(jwtToken, JWTUtil.usernameClaim);
+        String username = jwtUtil.getClaim(jwtToken, JWTUtil.usernameClaim);
         String provider = jwtUtil.getClaim(jwtToken, JWTUtil.providerClaim);
         String email = jwtUtil.getClaim(jwtToken, JWTUtil.emailClaim);
 

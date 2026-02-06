@@ -47,7 +47,6 @@ public class MemberController {
     public ResponseEntity<?> login(@RequestBody MemberLoginDTO dto) {
         try {
             Member member = memberService.login(dto);
-            memberService.login(dto);
             String token = jwtUtil.getJWT(dto.getId());
 
             Map<String, Object> response = new HashMap<>();
@@ -57,9 +56,9 @@ public class MemberController {
             String profile = member.getProfile();
             String profilepath;
             if (profile == null || profile.isEmpty()) {
-                profilepath = "http://10.125.121.182:8080/uploads/profiles/default-avatar.png";
+                profilepath = "/uploads/profiles/default-avatar.png";
             } else {
-                profilepath = "http://10.125.121.182:8080" + profile;
+                profilepath = profile;
             }
             response.put("profile", profilepath);
             response.put("name", member.getNickname());
@@ -99,6 +98,40 @@ public class MemberController {
 
             return ResponseEntity.status(401).body(errorResponse);
         }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyInfo(java.security.Principal principal) {
+        if (principal == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "로그인이 필요합니다.");
+            return ResponseEntity.status(401).body(errorResponse);
+        }
+
+        return memberRepo.findById(principal.getName())
+                .map(member -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", true);
+                    response.put("userId", member.getId());
+                    response.put("name", member.getNickname());
+
+                    String profile = member.getProfile();
+                    String profilepath;
+                    if (profile == null || profile.isEmpty()) {
+                        profilepath = "/uploads/profiles/default-avatar.png";
+                    } else {
+                        profilepath = profile;
+                    }
+                    response.put("profile", profilepath);
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("message", "사용자를 찾을 수 없습니다.");
+                    return ResponseEntity.status(404).body(errorResponse);
+                });
     }
 
 }
