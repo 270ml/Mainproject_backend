@@ -14,69 +14,67 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class TrendService {
-
-    @Value("${spring.security.oauth2.client.registration.naver.client-id}")
+    @Value("${naver.datalab.client-id}")
     private String CLIENT_ID;
-
-    @Value("${spring.security.oauth2.client.registration.naver.client-secret}")
+    
+    @Value("${naver.datalab.client-secret}")
     private String CLIENT_SECRET;
 
     private static final String API_URL = "https://openapi.naver.com/v1/datalab/shopping/category/keywords";
 
     public List<Map<String, Object>> getIntegratedTrend() {
-
         String[] styles = {
                 "레트로", "로맨틱", "리조트", "매니시", "밀리터리", "섹시", "소피스트케이티드",
                 "스트리트", "스포티", "아방가르드", "오리엔탈", "웨스턴", "젠더리스", "컨트리",
                 "클래식", "키치", "톰보이", "펑크", "페미닌", "프레피", "히피", "힙합"
         };
 
-        List<CompletableFuture<JsonNode>> futures = new ArrayList<>();
+        List<CompletableFuture<JsonNode>> trendRequests = new ArrayList<>();
 
-        //  4개씩 묶되, 모든 요청에 모던 포함
         for (int i = 0; i < styles.length; i += 4) {
             int end = Math.min(i + 4, styles.length);
             String[] group = Arrays.copyOfRange(styles, i, end);
-            futures.add(fetchFromNaver(group));
+            trendRequests.add(fetchFromNaver(group));
         }
 
         List<Map<String, Object>> finalResult = new ArrayList<>();
 
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenAccept(v -> {
-                    for (CompletableFuture<JsonNode> future : futures) {
+        CompletableFuture.allOf(trendRequests.toArray(new CompletableFuture[0]))
+                 .thenAccept(v -> {
+                    for (CompletableFuture<JsonNode> trend : trendRequests) {
                         try {
-                            JsonNode root = future.get();
+                            JsonNode resp = trend.get();
+                            
+                            // // double modernAvg = 0.0;
 
-                            double modernAvg = 0.0;
-                            Map<String, Double> styleAvgMap = new HashMap<>();
+                            // // Map<String, Double> styleAvgMap = new HashMap<>();
 
-                            //  각 키워드 평균 계산
-                            for (JsonNode result : root.get("results")) {
-                                String title = result.get("title").asText();
-                                double sum = 0;
+                            // //  각 키워드 평균 계산
+                            // for (JsonNode result : resp.get("results")) {
+                            //     String title = result.get("title").asText();
+                            //     double sum = 0;
 
-                                for (JsonNode data : result.get("data")) {
-                                    sum += data.get("ratio").asDouble();
-                                }
-                                double avg = sum / result.get("data").size();
+                            //     for (JsonNode data : result.get("data")) {
+                            //         sum += data.get("ratio").asDouble();
+                            //     }
+                            //     double avg = sum / result.get("data").size();
 
-                                if ("모던".equals(title)) {
-                                    modernAvg = avg;
-                                } else {
-                                    styleAvgMap.put(title, avg);
-                                }
-                            }
+                            //     if ("모던".equals(title)) {
+                            //         modernAvg = avg;
+                            //     } else {
+                            //         styleAvgMap.put(title, avg);
+                            //     }
+                            // }
 
-                            //  모던 기준 스케일링
-                            for (Map.Entry<String, Double> entry : styleAvgMap.entrySet()) {
-                                double ratio = entry.getValue() / modernAvg;
+                            // //  모던 기준 스케일링
+                            // for (Map.Entry<String, Double> entry : styleAvgMap.entrySet()) {
+                            //     double ratio = entry.getValue() / modernAvg;
 
-                                Map<String, Object> map = new HashMap<>();
-                                map.put("style", entry.getKey());
-                                map.put("score", Math.round(ratio * 100) / 100.0);
-                                finalResult.add(map);
-                            }
+                            //     Map<String, Object> map = new HashMap<>();
+                            //     map.put("style", entry.getKey());
+                            //     map.put("score", Math.round(ratio * 100) / 100.0);
+                            //     finalResult.add(map);
+                            // }
 
                         } catch (Exception e) {
                             e.printStackTrace();
