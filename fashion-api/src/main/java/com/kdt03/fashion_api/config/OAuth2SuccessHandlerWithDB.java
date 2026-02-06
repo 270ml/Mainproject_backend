@@ -23,23 +23,48 @@ public class OAuth2SuccessHandlerWithDB extends OAuth2SuccessHandler {
     private final MemberRepository memRepo;
     private final PasswordEncoder encoder;
     private final JWTUtil jwtUtil;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     @Override
     @Transactional
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException, ServletException {
         Map<String, String> map = getUserInfo(authentication);
         String username = map.get("provider") + "_" + map.get("id");
 
         memRepo.save(Member.builder().id(username)
-        .password(encoder.encode("1a2s3d4f"))
-        .nickname(map.get("name"))
-        .provider(map.get("provider"))
-        .profile(map.get("profile"))
-        .build());
+                .password(encoder.encode("1a2s3d4f"))
+                .nickname(map.get("name"))
+                .provider(map.get("provider"))
+                .profile(map.get("profile"))
+                .build());
         String token = jwtUtil.getJWT(username); // JWT 생성
         sendJWTtoClient(response, token);
-        // response.sendRedirect("/test-page");
-        response.sendRedirect("http://localhost:8080/?token=" + token); 
 
+        String targetUrl = determineTargetUrl(request, response, token);
+
+        if (response.isCommitted()) {
+            return;
+        }
+
+        clearAuthenticationAttributes(request, response);
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, String token) {
+        java.util.Optional<String> redirectUri = com.kdt03.fashion_api.util.CookieUtils
+                .getCookie(request, HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
+                .map(jakarta.servlet.http.Cookie::getValue);
+
+        String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
+
+        return org.springframework.web.util.UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("token", token)
+                .build().toUriString();
+    }
+
+    protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
+        super.clearAuthenticationAttributes(request);
+        cookieAuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
     }
 }

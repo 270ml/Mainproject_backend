@@ -20,55 +20,61 @@ import jakarta.annotation.Resource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Resource(name = "${project.oauth2login.qualifier.name}")
-    @Lazy
-    private AuthenticationSuccessHandler oauth2SuccessHandler;
+        @Resource(name = "${project.oauth2login.qualifier.name}")
+        @Lazy
+        private AuthenticationSuccessHandler oauth2SuccessHandler;
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public BCryptPasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-            com.kdt03.fashion_api.repository.MemberRepository memberRepo,
-            com.kdt03.fashion_api.util.JWTUtil jwtUtil) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsSource()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/members/logout").permitAll()
-                        .anyRequest().permitAll())
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable());
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http,
+                        com.kdt03.fashion_api.repository.MemberRepository memberRepo,
+                        com.kdt03.fashion_api.util.JWTUtil jwtUtil,
+                        HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository)
+                        throws Exception {
+                http.csrf(csrf -> csrf.disable())
+                                .cors(cors -> cors.configurationSource(corsSource()))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/members/logout").permitAll()
+                                                .anyRequest().permitAll())
+                                .formLogin(form -> form.disable())
+                                .httpBasic(basic -> basic.disable());
 
-        // OAuth2 로그인 설정
-        http.oauth2Login(oauth2 -> oauth2.successHandler(oauth2SuccessHandler));
+                // OAuth2 로그인 설정
+                http.oauth2Login(oauth2 -> oauth2
+                                .authorizationEndpoint(authorization -> authorization
+                                                .authorizationRequestRepository(cookieAuthorizationRequestRepository))
+                                .successHandler(oauth2SuccessHandler));
 
-        // 로그아웃 설정
-        http.logout(logout -> logout
-                .logoutUrl("/api/members/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(org.springframework.http.HttpStatus.OK.value());
-                }));
+                // 로그아웃 설정
+                http.logout(logout -> logout
+                                .logoutUrl("/api/members/logout")
+                                .logoutSuccessHandler((request, response, authentication) -> {
+                                        response.setStatus(org.springframework.http.HttpStatus.OK.value());
+                                }));
 
-        // JWT 필터
-        http.addFilterBefore(new com.kdt03.fashion_api.config.filter.JWTAuthorizationFilter(memberRepo, jwtUtil),
-                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                // JWT 필터
+                http.addFilterBefore(
+                                new com.kdt03.fashion_api.config.filter.JWTAuthorizationFilter(memberRepo, jwtUtil),
+                                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    private CorsConfigurationSource corsSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
-        config.addAllowedMethod(CorsConfiguration.ALL);
-        config.addAllowedHeader(CorsConfiguration.ALL);
-        config.setAllowCredentials(true);
-        config.addExposedHeader(HttpHeaders.AUTHORIZATION);
+        private CorsConfigurationSource corsSource() {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOriginPatterns(Arrays.asList("*"));
+                config.addAllowedMethod(CorsConfiguration.ALL);
+                config.addAllowedHeader(CorsConfiguration.ALL);
+                config.setAllowCredentials(true);
+                config.addExposedHeader(HttpHeaders.AUTHORIZATION);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", config);
+                return source;
+        }
 
 }
