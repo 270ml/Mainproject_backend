@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,5 +19,10 @@ public class ProductController {
     @GetMapping("/list")
     public List<ProductDTO> getProducts() {
         return productService.findAllProducts().stream().limit(10).toList();
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ProductDTO> getProduct(@RequestParam("productId") String productId) {
+        return ResponseEntity.ok(productService.getProductById(productId));
     }
 }

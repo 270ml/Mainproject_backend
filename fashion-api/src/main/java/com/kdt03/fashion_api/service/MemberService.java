@@ -40,6 +40,18 @@ public class MemberService {
         return member;
     }
 
+    // 회원 탈퇴
+    public void withdraw(String memberId, String password) {
+        Member member = memberRepo.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("가입되지 않은 회원입니다."));
+
+        if (!passwordEncoder.matches(password, member.getPassword())) {
+            throw new RuntimeException("비밀번호가 다릅니다.");
+        }
+
+        memberRepo.delete(member);
+    }
+
     // 전체 회원 조회 (테스트용)
     public java.util.List<MemberResponseDTO> getAllMembers() {
         return memberRepo.findAll().stream().map(member -> {

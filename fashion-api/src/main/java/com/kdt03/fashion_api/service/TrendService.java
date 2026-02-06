@@ -115,7 +115,7 @@ public class TrendService {
             body.put("endDate", endDate.format(formatter));
             body.put("timeUnit", "month");
             body.put("category", "50000000");
-            body.put("ages", List.of("40"));
+            body.put("ages", List.of("30","40","50"));
             body.put("gender", "f");
 
             List<Map<String, Object>> keywordList = new ArrayList<>();

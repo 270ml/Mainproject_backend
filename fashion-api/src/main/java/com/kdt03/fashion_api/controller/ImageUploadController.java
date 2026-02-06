@@ -29,9 +29,9 @@ public class ImageUploadController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         try {
-            // 서비스가 이제 Map을 돌려줍니다. 예..
+
             Map<String, Object> result = imageUploadService.uploadImage(file);
-            return ResponseEntity.ok(result); // 을..! 이제 포스트맨에 다 뜹니다.
+            return ResponseEntity.ok(result);
 
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("서버 오류");

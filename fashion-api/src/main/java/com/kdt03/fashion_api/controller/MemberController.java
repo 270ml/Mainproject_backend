@@ -14,6 +14,7 @@ import com.kdt03.fashion_api.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -78,6 +79,26 @@ public class MemberController {
     @PostMapping("/logout")
     public void logout() {
         // SecurityConfig에서 처리
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@RequestBody MemberLoginDTO dto, java.security.Principal principal) {
+        if (principal == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "로그인이 필요합니다.");
+            return ResponseEntity.status(401).body(errorResponse);
+        }
+        try {
+            memberService.withdraw(principal.getName(), dto.getPassword());
+            return ResponseEntity.ok("회원탈퇴 성공");
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.status(401).body(errorResponse);
+        }
     }
 
 }

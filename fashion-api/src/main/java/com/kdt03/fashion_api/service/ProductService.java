@@ -17,4 +17,9 @@ public class ProductService {
     public List<ProductDTO> findAllProducts() {
         return productRepo.findAllProducts();
     }
+
+    public ProductDTO getProductById(String productId) {
+        return productRepo.findProductById(productId)
+                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+    }
 }
