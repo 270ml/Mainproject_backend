@@ -19,6 +19,12 @@ public class Products {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Categories category;
+    @Column(columnDefinition = "vector")
+    private String embedding;
     @Column(columnDefinition = "TEXT")
     private String style;
+    @Column(name = "x_coord")
+    private float xCoord;
+    @Column(name = "y_coord")
+    private float yCoord;
 }

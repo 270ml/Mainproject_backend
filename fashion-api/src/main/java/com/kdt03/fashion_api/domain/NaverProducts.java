@@ -36,6 +36,9 @@ public class NaverProducts {
     @Column(name = "category_id")
     private String categoryId;
 
+    @Column(columnDefinition = "vector")
+    private String embedding;
+
     @Column(columnDefinition = "TEXT")
     private String style;
 
