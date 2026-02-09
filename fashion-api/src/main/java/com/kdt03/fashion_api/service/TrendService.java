@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 public class TrendService {
     @Value("${naver.datalab.client-id}")
     private String CLIENT_ID;
-    
+
     @Value("${naver.datalab.client-secret}")
     private String CLIENT_SECRET;
 
@@ -40,40 +40,40 @@ public class TrendService {
         List<Map<String, Object>> finalResult = new ArrayList<>();
 
         CompletableFuture.allOf(trendRequests.toArray(new CompletableFuture[0]))
-                 .thenAccept(v -> {
+                .thenAccept(v -> {
                     for (CompletableFuture<JsonNode> trend : trendRequests) {
                         try {
                             JsonNode resp = trend.get();
-                            
+
                             // // double modernAvg = 0.0;
 
                             // // Map<String, Double> styleAvgMap = new HashMap<>();
 
-                            // //  각 키워드 평균 계산
+                            // // 각 키워드 평균 계산
                             // for (JsonNode result : resp.get("results")) {
-                            //     String title = result.get("title").asText();
-                            //     double sum = 0;
+                            // String title = result.get("title").asText();
+                            // double sum = 0;
 
-                            //     for (JsonNode data : result.get("data")) {
-                            //         sum += data.get("ratio").asDouble();
-                            //     }
-                            //     double avg = sum / result.get("data").size();
+                            // for (JsonNode data : result.get("data")) {
+                            // sum += data.get("ratio").asDouble();
+                            // }
+                            // double avg = sum / result.get("data").size();
 
-                            //     if ("모던".equals(title)) {
-                            //         modernAvg = avg;
-                            //     } else {
-                            //         styleAvgMap.put(title, avg);
-                            //     }
+                            // if ("모던".equals(title)) {
+                            // modernAvg = avg;
+                            // } else {
+                            // styleAvgMap.put(title, avg);
+                            // }
                             // }
 
-                            // //  모던 기준 스케일링
+                            // // 모던 기준 스케일링
                             // for (Map.Entry<String, Double> entry : styleAvgMap.entrySet()) {
-                            //     double ratio = entry.getValue() / modernAvg;
+                            // double ratio = entry.getValue() / modernAvg;
 
-                            //     Map<String, Object> map = new HashMap<>();
-                            //     map.put("style", entry.getKey());
-                            //     map.put("score", Math.round(ratio * 100) / 100.0);
-                            //     finalResult.add(map);
+                            // Map<String, Object> map = new HashMap<>();
+                            // map.put("style", entry.getKey());
+                            // map.put("score", Math.round(ratio * 100) / 100.0);
+                            // finalResult.add(map);
                             // }
 
                         } catch (Exception e) {
@@ -94,7 +94,6 @@ public class TrendService {
         return finalResult;
     }
 
-   
     private CompletableFuture<JsonNode> fetchFromNaver(String[] keywords) {
         return CompletableFuture.supplyAsync(() -> {
             RestTemplate restTemplate = new RestTemplate();
@@ -113,7 +112,7 @@ public class TrendService {
             body.put("endDate", endDate.format(formatter));
             body.put("timeUnit", "month");
             body.put("category", "50000000");
-            body.put("ages", List.of("30","40","50"));
+            body.put("ages", List.of("30", "40", "50"));
             body.put("gender", "f");
 
             List<Map<String, Object>> keywordList = new ArrayList<>();

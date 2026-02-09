@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.kdt03.fashion_api.domain.dto.ProductDTO;
+import com.kdt03.fashion_api.domain.dto.ProductMapDTO;
 import com.kdt03.fashion_api.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,9 @@ public class ProductService {
     public ProductDTO getProductById(String productId) {
         return productRepo.findProductById(productId)
                 .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+    }
+
+    public List<ProductMapDTO> getProductMapData() {
+        return productRepo.findAllProductMaps();
     }
 }
