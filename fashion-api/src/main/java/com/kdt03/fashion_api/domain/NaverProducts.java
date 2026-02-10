@@ -34,7 +34,6 @@ public class NaverProducts {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    @Column(name = "category_id")
     private Categories category;
 
     @Column(columnDefinition = "vector(2048)")
