@@ -1,5 +1,6 @@
 package com.kdt03.fashion_api.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import lombok.Setter;
 public class Member {
     @Id
     private String id;
+    @Column(length = 255)
     private String password;
     private String nickname;
     private String provider;
