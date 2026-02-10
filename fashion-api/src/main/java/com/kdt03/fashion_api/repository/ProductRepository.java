@@ -13,8 +13,9 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<InternalProducts, String> {
         @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl)"
-                        + " from InternalProducts p left join p.category c")
-        List<ProductDTO> findAllProducts();
+                        + " from InternalProducts p left join p.category c "
+                        + " where (:categoryName is null or c.categoryName = :categoryName)")
+        List<ProductDTO> findAllProducts(@Param("categoryName") String categoryName);
 
         @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl)"
                         + " from InternalProducts p left join p.category c where p.productId = :productId")

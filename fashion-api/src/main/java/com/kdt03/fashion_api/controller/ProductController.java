@@ -21,8 +21,8 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/list")
-    public List<ProductDTO> getProducts() {
-        return productService.findAllProducts();
+    public List<ProductDTO> getProducts(@RequestParam(value = "categoryName", required = false) String categoryName) {
+        return productService.findAllProducts(categoryName);
     }
 
     @GetMapping("/detail")

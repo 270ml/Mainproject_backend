@@ -16,8 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class ProductService {
     private final ProductRepository productRepo;
 
-    public List<ProductDTO> findAllProducts() {
-        return productRepo.findAllProducts();
+    public List<ProductDTO> findAllProducts(String categoryName) {
+        return productRepo.findAllProducts(categoryName);
     }
 
     public ProductDTO getProductById(String productId) {
