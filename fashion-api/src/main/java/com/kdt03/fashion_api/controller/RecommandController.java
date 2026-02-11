@@ -23,6 +23,11 @@ public class RecommandController {
 
     private final RecommandService recommandService;
 
+    @GetMapping("/{productId}")
+    public List<SimilarProductDTO> recommand(@PathVariable String productId) {
+        return recommandService.recommand(productId);
+    }
+
     @GetMapping("/demo/{productId}")
     public List<SimilarProductDTO> getDemoRecommendations(@PathVariable("productId") String productId) {
         return recommandService.getDemoRecommendations(productId);
