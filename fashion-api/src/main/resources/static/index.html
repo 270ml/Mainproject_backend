@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion API Admin | Purple</title>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #0f111a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #e0e0e0;
+        }
+
+        .container {
+            background: #1c1e29;
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 400px;
+            border: 1px solid #333644;
+            /* 테두리도 은은하게.. 예.. */
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: #a855f7;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 10px #a855f7;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+
+        .btn-swagger {
+            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+        }
+
+        .btn-log {
+            background-color: #2d2f3f;
+            border: 1px solid #44475a;
+        }
+
+        .btn-test {
+            background-color: #3b3d4d;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #636674;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #333644;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="margin-bottom: 12px;">
+            <span class="status-dot"></span>
+            <span style="color: #a855f7; font-weight: bold; font-size: 0.85rem; letter-spacing: 1px;">SYSTEM
+                ACTIVE</span>
+        </div>
+        <h1>Fashion API Backend</h1>
+        <p style="color: #9499ad; font-size: 0.9rem; line-height: 1.5;">
+            예.. 음.. 을..! 접속 환영합니다.....<br>원하시는 메뉴를 골라보세요..... 예...
+        </p>
+
+        <div class="btn-group">
+            <a href="/swagger-ui/index.html" class="btn btn-swagger">📖 Swagger API Docs</a>
+            <a href="/api/logs/view" class="btn btn-log">📋 System Logs</a>
+            <hr>
+            <a href="/test-page" class="btn btn-test">🖼 Upload Test</a>
+            <a href="/product-list" class="btn btn-test">👕 Product List</a>
+            <a href="/profile_test" class="btn btn-test">🤷‍♂️ Profile Test</a>
+        </div>
+
+        <div class="footer">
+            2026-02-11 | Fashion API v0.0.1 <br>
+            <span style="font-size: 0.7rem; opacity: 0.5;">예.. 음.. 을..!</span>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -5,7 +5,7 @@ public interface SimilarProductProjection {
 
     String getTitle();
 
-    String getPrice();
+    Integer getPrice();
 
     String getImageUrl();
 

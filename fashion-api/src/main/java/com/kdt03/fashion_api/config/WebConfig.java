@@ -15,8 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:///C:/uploads/");
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:///C:/clothimage/");
-
-        // Swagger 수동 매핑 제거 (라이브러리 자동 설정 사용)
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
     }
 
     @Override
@@ -25,8 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/product-list").setViewName("productList");
         registry.addViewController("/test-page").setViewName("uploadTest");
         registry.addViewController("/profile_test").setViewName("profile_test");
-
-        // Swagger 리다이렉트 수동 설정 제거
+        registry.addViewController("/").setViewName("forward:/index.html");
     }
 
 }

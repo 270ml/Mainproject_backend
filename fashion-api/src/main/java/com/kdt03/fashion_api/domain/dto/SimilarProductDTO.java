@@ -8,7 +8,7 @@ import lombok.Getter;
 public class SimilarProductDTO {
     private String productId;
     private String title;
-    private String price;
+    private Integer price;
     private String imageUrl;
     private String productLink;
     private Double similarityScore;
