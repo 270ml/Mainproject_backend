@@ -34,7 +34,7 @@
 
             try {
 
-                const response = await fetch('http://10.125.121.182:8080/api/imageupload/upload', {
+                const response = await fetch('/api/imageupload/upload', {
                     method: 'POST',
                     body: formData
                 });
