@@ -37,6 +37,6 @@ out/
 .vscode/
 
 .env
+### Logs ###
 logs/
-/logs/
-fashion-api.log
+*.log
