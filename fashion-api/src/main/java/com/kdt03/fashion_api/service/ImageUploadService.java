@@ -50,7 +50,7 @@ public class ImageUploadService {
 
         try {
             // Supabase API를 통한 이미지 업로드
-            WebClient.create().post()
+            String response = WebClient.create().post()
                     .uri(uploadUrl)
                     .header("Authorization", "Bearer " + supabaseKey)
                     .header("apikey", supabaseKey)
@@ -59,9 +59,11 @@ public class ImageUploadService {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
+            System.out.println("Supabase Upload Success: " + response);
         } catch (Exception e) {
-            System.err.println("Supabase Upload Error: " + e.getMessage());
-            throw new IOException("Supabase 업로드 실패: " + e.getMessage());
+            System.err.println("Supabase Upload Error Detailed: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Supabase 업로드 실패: " + e.getMessage(), e);
         }
 
         // 업로드 성공 후 공개 URL 구성

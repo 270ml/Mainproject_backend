@@ -33,7 +33,8 @@ public class ImageUploadController {
             return ResponseEntity.ok(result);
 
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().body("서버 오류");
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("서버 오류: " + e.getMessage());
         }
     }
 
