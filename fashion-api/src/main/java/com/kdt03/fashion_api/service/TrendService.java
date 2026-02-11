@@ -2,6 +2,11 @@ package com.kdt03.fashion_api.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kdt03.fashion_api.domain.dto.StyleSalesTrendDTO;
+import com.kdt03.fashion_api.repository.SalesLogRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,7 +18,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@RequiredArgsConstructor
 public class TrendService {
+    private final SalesLogRepository salesLogRepo;
+
     @Value("${naver.datalab.client-id}")
     private String CLIENT_ID;
     
@@ -21,6 +29,30 @@ public class TrendService {
     private String CLIENT_SECRET;
 
     private static final String API_URL = "https://openapi.naver.com/v1/datalab/shopping/category/keywords";
+
+    public List<StyleSalesTrendDTO> getTrendByYear(int year) {
+        List<Object[]> results = salesLogRepo.findMonthlySalesTrends(year);
+        Map<Integer, Map<String, Integer>> monthlyTrends = new HashMap<>();
+
+        for(Object[] r : results) {
+            String monthStr = (String) r[0];
+            String style = (String) r[1];
+            Integer quantity = ((Number) r[2]).intValue();
+
+            int month = Integer.parseInt(monthStr.substring(5, 7));
+            monthlyTrends.putIfAbsent(month, new HashMap<>());
+            monthlyTrends.get(month).put(style, quantity);
+        }
+
+        List<StyleSalesTrendDTO> trendDTO = monthlyTrends.entrySet().stream()
+            .map(e -> StyleSalesTrendDTO.builder()
+                .month(e.getKey())
+                .styles(e.getValue())
+                .build())
+                .toList();
+        
+        return trendDTO;
+    }
 
     public List<Map<String, Object>> getIntegratedTrend() {
         String[] styles = {

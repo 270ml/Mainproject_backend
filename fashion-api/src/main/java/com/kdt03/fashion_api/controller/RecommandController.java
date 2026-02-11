@@ -29,6 +29,11 @@ public class RecommandController {
 
     private final RecommandService recommandService;
 
+    @GetMapping("/{productId}")
+    public List<SimilarProductDTO> recommand(@PathVariable String productId) {
+        return recommandService.recommand(productId);
+    }
+
     @Operation(summary = "데모 유사 상품 조회 (ID)", description = "상품 ID를 기반으로 AI가 분석한 유사 상품 리스트를 반환하는 데모 API입니다.")
     @GetMapping("/demo/{productId}")
     public List<SimilarProductDTO> getDemoRecommendations(
