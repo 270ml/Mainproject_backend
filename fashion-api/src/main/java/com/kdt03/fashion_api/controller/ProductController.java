@@ -51,4 +51,16 @@ public class ProductController {
     public List<StyleCountDTO> getStyleCounts() {
         return productService.countProductsByStyle();
     }
+
+    @Operation(summary = "내부 상품 개수 조회", description = "InternalProducts 테이블의 총 상품 개수를 반환합니다.")
+    @GetMapping("/internal-count")
+    public long getInternalProductCount() {
+        return productService.getInternalProductCount();
+    }
+
+    @Operation(summary = "네이버 상품 개수 조회", description = "NaverProduct 테이블의 총 상품 개수를 반환합니다.")
+    @GetMapping("/naver-count")
+    public long getNaverProductCount() {
+        return productService.getNaverProductCount();
+    }
 }

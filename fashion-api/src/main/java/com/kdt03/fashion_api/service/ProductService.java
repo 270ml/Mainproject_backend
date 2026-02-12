@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class ProductService {
     private final ProductRepository productRepo;
+    private final com.kdt03.fashion_api.repository.NaverProductRepository naverProductRepo;
 
     public List<ProductDTO> findAllProducts(String categoryName) {
         java.time.LocalDate oneYearAgo = java.time.LocalDate.now().minusYears(1);
@@ -41,5 +42,13 @@ public class ProductService {
 
     public List<StyleCountDTO> countProductsByStyle() {
         return productRepo.countProductsByStyle();
+    }
+
+    public long getInternalProductCount() {
+        return productRepo.count();
+    }
+
+    public long getNaverProductCount() {
+        return naverProductRepo.count();
     }
 }
