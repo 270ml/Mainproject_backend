@@ -24,7 +24,7 @@ public class SalesLog {
     private String productId;
 
     @Column(name = "sale_quantity")
-    private String saleQuantity;
+    private Integer saleQuantity;
 
     @Column(name = "sale_date")
     private LocalDate saleDate;
