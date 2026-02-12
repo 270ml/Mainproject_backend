@@ -7,14 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kdt03.fashion_api.domain.dto.YearlyTrendDTO;
 import com.kdt03.fashion_api.service.TrendService;
 
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
