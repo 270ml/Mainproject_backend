@@ -13,9 +13,14 @@ import java.util.Optional;
 import com.kdt03.fashion_api.domain.dto.StyleCountDTO;
 
 public interface ProductRepository extends JpaRepository<InternalProducts, String> {
-        @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl)"
-                        + " from InternalProducts p left join p.category c "
-                        + " where (:categoryName is null or c.categoryName = :categoryName)")
+        @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl) "
+                        + "from InternalProducts p "
+                        + "left join p.category c "
+                        + "left join SalesLog s on s.productId = p.productId "
+                        + "and s.saleDate >= CURRENT_DATE - 365 "
+                        + "where (:categoryName is null or c.categoryName = :categoryName) "
+                        + "group by p.productId, p.productName, p.price, c.categoryName, p.imageUrl "
+                        + "order by coalesce(sum(s.saleQuantity), 0) desc")
         List<ProductDTO> findAllProducts(@Param("categoryName") String categoryName);
 
         @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl)"
