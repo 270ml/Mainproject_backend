@@ -3,6 +3,7 @@ package com.kdt03.fashion_api.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kdt03.fashion_api.domain.Member;
 import com.kdt03.fashion_api.domain.dto.MemberLoginDTO;
@@ -18,16 +19,34 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
     private final MemberRepository memberRepo;
     private final PasswordEncoder passwordEncoder;
+    private final ImageUploadService imageUploadService;
 
-    // 회원가입
-    public void signup(MemberSignupDTO dto) {
+    // 회원가입 (프로필 이미지 선택사항)
+    @Transactional
+    public void signup(MemberSignupDTO dto, MultipartFile profileImage) {
         String raw = dto.getPassword();
         String encoded = passwordEncoder.encode(raw);
 
-        Member member = Member.builder().id(dto.getId()).nickname(dto.getNickname()).password(encoded)
-                .provider("local").build();
+        Member member = Member.builder()
+                .id(dto.getId())
+                .nickname(dto.getNickname())
+                .password(encoded)
+                .provider("local")
+                .build();
 
         memberRepo.save(member);
+
+        // 프로필 이미지가 있으면 업로드
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                String profileUrl = imageUploadService.uploadProfileImage(profileImage, dto.getId());
+                member.setProfile(profileUrl);
+                memberRepo.save(member);
+            } catch (Exception e) {
+                // 프로필 이미지 업로드 실패해도 회원가입은 성공으로 처리
+                System.err.println("프로필 이미지 업로드 실패 (회원가입은 성공): " + e.getMessage());
+            }
+        }
     }
 
     // 로그인

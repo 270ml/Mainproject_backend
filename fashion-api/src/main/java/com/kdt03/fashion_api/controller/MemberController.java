@@ -36,10 +36,21 @@ public class MemberController {
     private final MemberRepository memberRepo;
     private final JWTUtil jwtUtil;
 
-    @Operation(summary = "회원 가입", description = "신규 회원 정보를 등록합니다. 아이디, 비밀번호, 닉네임이 필요합니다.")
-    @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody MemberSignupDTO dto) {
-        memberService.signup(dto);
+    @Operation(summary = "회원 가입", description = "신규 회원 정보를 등록합니다. 아이디, 비밀번호, 닉네임이 필요하며, 프로필 사진은 선택사항입니다.")
+    @PostMapping(value = "/signup", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> signup(
+            @Parameter(description = "회원 아이디", required = true) @org.springframework.web.bind.annotation.RequestParam("id") String id,
+            @Parameter(description = "회원 비밀번호", required = true) @org.springframework.web.bind.annotation.RequestParam("password") String password,
+            @Parameter(description = "회원 닉네임", required = true) @org.springframework.web.bind.annotation.RequestParam("nickname") String nickname,
+            @Parameter(description = "프로필 이미지 파일 (선택사항)", required = false) @org.springframework.web.bind.annotation.RequestParam(value = "profileImage", required = false) org.springframework.web.multipart.MultipartFile profileImage) {
+
+        MemberSignupDTO dto = MemberSignupDTO.builder()
+                .id(id)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
+        memberService.signup(dto, profileImage);
         return ResponseEntity.ok("회원가입 성공");
     }
 
