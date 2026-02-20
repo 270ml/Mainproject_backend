@@ -11,7 +11,7 @@ import lombok.Getter;
 
 @Getter
 @Entity
-@Table(name = "internal_products")
+@Table(name = "nineounce_products")
 public class InternalProducts {
     @Id
     @Column(name = "product_id")
@@ -26,18 +26,10 @@ public class InternalProducts {
     @JoinColumn(name = "category_id")
     private Categories category;
 
-    @Column(columnDefinition = "vector(2048)")
-    private float[] embedding;
-
-    @Column(columnDefinition = "TEXT")
-    private String style;
-
-    @Column(name = "x_coord")
-    private Float xCoord;
-
-    @Column(name = "y_coord")
-    private Float yCoord;
-
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "style_id")
+    private Styles style;
 }

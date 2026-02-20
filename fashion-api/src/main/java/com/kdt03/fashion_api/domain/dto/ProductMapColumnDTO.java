@@ -10,6 +10,6 @@ public class ProductMapColumnDTO {
     private List<String> productIds;
     private List<String> productNames;
     private List<String> styles;
-    private List<Float> xCoords;
-    private List<Float> yCoords;
+    private List<Double> xCoords;
+    private List<Double> yCoords;
 }

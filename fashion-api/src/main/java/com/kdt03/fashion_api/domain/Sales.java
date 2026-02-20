@@ -27,7 +27,7 @@ public class Sales {
     @Column(name = "sale_id")
     private Integer saleId;
 
-    @ManyToOne(fetch =  FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private InternalProducts product;
 
@@ -36,7 +36,4 @@ public class Sales {
 
     @Column(name = "sale_price")
     private Integer salePrice;
-
-    @Column(name = "sale_rate")
-    private Float saleRate;
 }

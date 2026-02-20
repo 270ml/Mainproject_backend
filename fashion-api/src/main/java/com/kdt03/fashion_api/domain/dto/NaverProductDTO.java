@@ -30,7 +30,7 @@ public class NaverProductDTO {
                 .imageUrl(entity.getImageUrl())
                 .productLink(entity.getProductLink())
                 .categoryName(entity.getCategory().getCategoryName())
-                .style(entity.getStyle())
+                .style(entity.getStyle() != null ? entity.getStyle().getStyleName() : null)
                 .build();
     }
 }

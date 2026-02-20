@@ -10,7 +10,7 @@ import com.kdt03.fashion_api.domain.dto.SalesDTO;
 
 public interface SalesRepository extends JpaRepository<Sales, Integer> {
 
-    @Query("SELECT new com.kdt03.fashion_api.domain.dto.SalesDTO(p.productId, p.productName, s.saleQuantity, s.salePrice, s.saleRate) "
+    @Query("SELECT new com.kdt03.fashion_api.domain.dto.SalesDTO(p.productId, p.productName, s.saleQuantity, s.salePrice) "
             +
             "FROM Sales s JOIN s.product p " +
             "ORDER BY s.saleQuantity DESC")

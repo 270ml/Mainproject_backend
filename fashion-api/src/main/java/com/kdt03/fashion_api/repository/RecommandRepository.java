@@ -10,25 +10,29 @@ import com.kdt03.fashion_api.domain.InternalProducts;
 import com.kdt03.fashion_api.domain.dto.SimilarProductProjection;
 
 public interface RecommandRepository extends JpaRepository<InternalProducts, String> {
+
     @Query(value = """
             SELECT np.product_id as productId,
                    np.title as title,
                    np.price as price,
                    np.image_url as imageUrl,
                    np.product_link as productLink,
-                   1 - (p.embedding <=> np.embedding) as similarityScore
-            from internal_products p
-            join naver_products np on true
-            where p.product_id = :internalImageId
-            order by p.embedding <=> np.embedding desc
+                   1 - (pv.embedding <=> npv.embedding) as similarityScore
+            from nineounce_product_vectors pv
+            join naver_product_vectors npv on true
+            join naver_products np on npv.product_id = np.product_id
+            where pv.product_id = :internalImageId
+            order by pv.embedding <=> npv.embedding
             limit 10
             """, nativeQuery = true)
     List<SimilarProductProjection> findSimilarProducts(@Param("internalImageId") String internalImageId);
 
     @Query(value = """
             WITH random_samples AS (
-                SELECT * FROM internal_products
-                WHERE product_id != :baseId AND embedding IS NOT NULL
+                SELECT ipv.*, ip.product_name, ip.price, ip.image_url
+                FROM nineounce_product_vectors ipv
+                JOIN nineounce_products ip ON ipv.product_id = ip.product_id
+                WHERE ipv.product_id != :baseId AND ipv.embedding IS NOT NULL
                 ORDER BY RANDOM()
                 LIMIT 10
             )
@@ -38,7 +42,7 @@ public interface RecommandRepository extends JpaRepository<InternalProducts, Str
                    rs.image_url as imageUrl,
                    '' as productLink,
                    1 - (p.embedding <=> rs.embedding) as similarityScore
-            FROM internal_products p
+            FROM nineounce_product_vectors p
             JOIN random_samples rs ON true
             WHERE p.product_id = :baseId
             ORDER BY similarityScore DESC
@@ -47,8 +51,10 @@ public interface RecommandRepository extends JpaRepository<InternalProducts, Str
 
     @Query(value = """
             WITH random_samples AS (
-                SELECT * FROM internal_products
-                WHERE embedding IS NOT NULL
+                SELECT ipv.*, ip.product_name, ip.price, ip.image_url
+                FROM nineounce_product_vectors ipv
+                JOIN nineounce_products ip ON ipv.product_id = ip.product_id
+                WHERE ipv.embedding IS NOT NULL
                 ORDER BY RANDOM()
                 LIMIT 10
             )

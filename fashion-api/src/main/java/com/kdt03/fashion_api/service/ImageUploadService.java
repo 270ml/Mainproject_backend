@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,12 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.kdt03.fashion_api.domain.Member;
+import com.kdt03.fashion_api.domain.dto.AnalysisResponseDTO;
 import com.kdt03.fashion_api.repository.MemberRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class ImageUploadService {
-    private final WebClient webClient = WebClient.builder().baseUrl("http://127.0.0.1:8000").build();
+    private final WebClient webClient;
     private final MemberRepository memberRepo;
 
     @Value("${SUPABASE_URL}")
@@ -30,6 +29,12 @@ public class ImageUploadService {
 
     @Value("${SUPABASE_KEY}")
     private String supabaseKey;
+
+    public ImageUploadService(WebClient.Builder webClientBuilder, MemberRepository memberRepo,
+            @Value("${app.fastapi.url}") String fastApiUrl) {
+        this.webClient = webClientBuilder.baseUrl(fastApiUrl).build();
+        this.memberRepo = memberRepo;
+    }
 
     @Transactional
     public Map<String, Object> uploadImage(MultipartFile file) throws IOException {
@@ -128,5 +133,37 @@ public class ImageUploadService {
         } catch (Exception e) {
             throw new IOException("Supabase 업로드 실패: " + e.getMessage());
         }
+    }
+
+    public AnalysisResponseDTO uploadAndAnalyze(MultipartFile file) throws IOException {
+        // FastAPI로 이미지 전송 및 분석 결과 수신
+        Map<String, Object> fastApiResponse = new HashMap<>();
+        try {
+            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+            builder.part("file", file.getResource());
+
+            // WebClient를 사용하여 FastAPI 호출
+            fastApiResponse = webClient.post()
+                    .uri("/search/upload?top_k=10")
+                    .body(BodyInserters.fromMultipartData(builder.build()))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    })
+                    .block();
+
+            if (fastApiResponse == null) {
+                fastApiResponse = new HashMap<>();
+            }
+
+        } catch (Exception e) {
+            // 분석 실패 시 로그 남기고 빈 결과 반환 또는 예외 처리
+            System.err.println("FastAPI analysis failed: " + e.getMessage());
+            fastApiResponse.put("error", "이미지 분석에 실패했습니다.");
+        }
+
+        // DTO 매핑 및 반환
+        return AnalysisResponseDTO.builder()
+                .analysisResult(fastApiResponse)
+                .build();
     }
 }

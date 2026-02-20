@@ -36,9 +36,7 @@ public class NaverProducts {
     @JoinColumn(name = "category_id")
     private Categories category;
 
-    @Column(columnDefinition = "vector(2048)")
-    private float[] embedding;
-
-    @Column(columnDefinition = "TEXT")
-    private String style;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "style_id")
+    private Styles style;
 }

@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kdt03.fashion_api.domain.dto.SalesDTO;
-import com.kdt03.fashion_api.repository.SalesRepository;
+import java.time.LocalDate;
+import com.kdt03.fashion_api.repository.SalesLogRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,11 +16,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SalesService {
 
-    private final SalesRepository salesRepository;
+    private final SalesLogRepository salesLogRepository;
 
     @Transactional(readOnly = true)
-    public List<SalesDTO> getTop10BestSellingProducts() {
-        return salesRepository.findTop10SalesDTO().stream()
+    public List<SalesDTO> getTop10BestSellingProducts(LocalDate startDate, LocalDate endDate, String storeId) {
+        if (startDate == null)
+            startDate = LocalDate.of(2000, 1, 1);
+        if (endDate == null)
+            endDate = LocalDate.now();
+
+        return salesLogRepository.findBestSellingProducts(startDate, endDate, storeId).stream()
                 .limit(10)
                 .collect(Collectors.toList());
     }

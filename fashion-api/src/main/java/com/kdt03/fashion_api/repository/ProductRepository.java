@@ -1,18 +1,18 @@
 package com.kdt03.fashion_api.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.kdt03.fashion_api.domain.InternalProducts;
-
-import org.springframework.data.jpa.repository.Query;
 import com.kdt03.fashion_api.domain.dto.ProductDTO;
-
-import java.util.List;
-import org.springframework.data.repository.query.Param;
-import java.util.Optional;
 import com.kdt03.fashion_api.domain.dto.StyleCountDTO;
 
 public interface ProductRepository extends JpaRepository<InternalProducts, String> {
+
         @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl) "
                         + "from InternalProducts p "
                         + "left join p.category c "
@@ -28,15 +28,18 @@ public interface ProductRepository extends JpaRepository<InternalProducts, Strin
                         + " from InternalProducts p left join p.category c where p.productId = :productId")
         Optional<ProductDTO> findProductById(@Param("productId") String productId);
 
-        @Query("select new com.kdt03.fashion_api.domain.dto.ProductMapDTO(p.productId, p.productName, p.style, p.xCoord, p.yCoord) "
+        @Query("select new com.kdt03.fashion_api.domain.dto.ProductMapDTO(p.productId, p.productName, s.styleName, v.xCoord, v.yCoord) "
                         + "from InternalProducts p "
-                        + "where p.style is not null and p.xCoord is not null and p.yCoord is not null")
+                        + "join InternalProductVectors v on v.productId = p.productId "
+                        + "left join p.style s "
+                        + "where p.style is not null and v.xCoord is not null and v.yCoord is not null")
         List<com.kdt03.fashion_api.domain.dto.ProductMapDTO> findAllProductMaps();
 
-        @Query("select new com.kdt03.fashion_api.domain.dto.StyleCountDTO(p.style, count(p)) "
-                        + "from InternalProducts p "
-                        + "where p.style is not null "
-                        + "group by p.style "
-                        + "order by count(p) desc")
+        @Query("SELECT new com.kdt03.fashion_api.domain.dto.StyleCountDTO(s.styleName, COUNT(p)) " +
+                        "FROM InternalProducts p " +
+                        "JOIN p.style s " +
+                        "WHERE p.style IS NOT NULL " +
+                        "GROUP BY s.styleName " +
+                        "ORDER BY COUNT(p) DESC")
         List<StyleCountDTO> countProductsByStyle();
 }

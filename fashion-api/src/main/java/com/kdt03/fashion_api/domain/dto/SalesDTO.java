@@ -18,7 +18,6 @@ public class SalesDTO {
     private String productName;
     private Integer saleQuantity;
     private Integer salePrice;
-    private Float saleRate;
 
     public static SalesDTO fromEntity(Sales entity) {
         return SalesDTO.builder()
@@ -26,7 +25,6 @@ public class SalesDTO {
                 .productName(entity.getProduct().getProductName())
                 .saleQuantity(entity.getSaleQuantity())
                 .salePrice(entity.getSalePrice())
-                .saleRate(entity.getSaleRate())
                 .build();
     }
 }

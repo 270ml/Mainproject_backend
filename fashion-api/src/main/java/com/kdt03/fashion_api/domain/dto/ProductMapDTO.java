@@ -9,6 +9,6 @@ public class ProductMapDTO {
     private String productId;
     private String productName;
     private String style;
-    private Float xCoord;
-    private Float yCoord;
+    private Double xCoord;
+    private Double yCoord;
 }
