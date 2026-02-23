@@ -19,7 +19,6 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class SalesLog {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seq")

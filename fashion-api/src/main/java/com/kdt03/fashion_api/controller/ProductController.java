@@ -59,7 +59,7 @@ public class ProductController {
         return productService.countProductsByStyle();
     }
 
-    @Operation(summary = "내부 상품 개수 조회", description = "InternalProducts 테이블의 총 상품 개수를 반환합니다.")
+    @Operation(summary = "나인온스 상품 개수 조회", description = "InternalProducts 테이블의 총 상품 개수를 반환합니다.")
     @GetMapping("/internal-count")
     public long getInternalProductCount() {
         return productService.getInternalProductCount();

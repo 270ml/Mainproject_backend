@@ -12,7 +12,6 @@ import com.kdt03.fashion_api.domain.dto.ProductDTO;
 import com.kdt03.fashion_api.domain.dto.StyleCountDTO;
 
 public interface ProductRepository extends JpaRepository<InternalProducts, String> {
-
         @Query("select new com.kdt03.fashion_api.domain.dto.ProductDTO(p.productId, p.productName, p.price, c.categoryName, p.imageUrl) "
                         + "from InternalProducts p "
                         + "left join p.category c "

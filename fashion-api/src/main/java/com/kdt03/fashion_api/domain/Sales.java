@@ -21,7 +21,6 @@ import lombok.Builder;
 @AllArgsConstructor
 @Table(name = "sales")
 public class Sales {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sale_id")

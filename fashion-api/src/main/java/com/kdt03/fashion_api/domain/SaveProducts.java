@@ -12,7 +12,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "save_products")
@@ -21,7 +23,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class SaveProducts {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "save_id")
@@ -33,6 +34,7 @@ public class SaveProducts {
     @Column(name = "naver_product_id", nullable = false)
     private String naverProductId;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 }

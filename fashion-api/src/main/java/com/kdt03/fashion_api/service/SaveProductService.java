@@ -45,7 +45,7 @@ public class SaveProductService {
                             naver.getPrice(),
                             naver.getImageUrl(),
                             naver.getProductLink(),
-                            save.getCreatedAt().atStartOfDay()
+                            save.getCreatedAt()
                     );
                 })
                 .filter(dto -> dto != null)

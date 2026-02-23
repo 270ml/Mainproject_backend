@@ -24,7 +24,7 @@ public class SaveProductController {
     @PostMapping
     @Operation(summary = "관심 상품 등록", description = "네이버 상품을 관심 상품으로 등록합니다.")
     public ResponseEntity<?> addSaveProduct(
-            @RequestParam String memberId,
+            @RequestParam("memberId") String memberId,
             @RequestBody SaveProductRequestDTO dto) {
         saveProductService.addSaveProduct(memberId, dto);
         return ResponseEntity.ok().body("관심 상품에 추가되었습니다.");
@@ -33,15 +33,15 @@ public class SaveProductController {
     @GetMapping
     @Operation(summary = "관심 상품 목록 조회", description = "특정 회원의 관심 상품 목록을 조회합니다.")
     public ResponseEntity<List<SaveProductResponseDTO>> getMySaveProducts(
-            @RequestParam String memberId) {
+            @RequestParam("memberId") String memberId) {
         return ResponseEntity.ok(saveProductService.getMySaveProducts(memberId));
     }
 
     @DeleteMapping("/{saveId}")
     @Operation(summary = "관심 상품 삭제", description = "관심 상품을 삭제합니다.")
     public ResponseEntity<?> deleteSaveProduct(
-            @PathVariable Long saveId,
-            @RequestParam String memberId) {
+            @PathVariable("saveId") Long saveId,
+            @RequestParam("memberId") String memberId) {
         saveProductService.deleteSaveProduct(saveId, memberId);
         return ResponseEntity.ok().body("관심 상품이 삭제되었습니다.");
     }
