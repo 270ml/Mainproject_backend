@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kdt03.fashion_api.domain.Member;
 import com.kdt03.fashion_api.domain.dto.AnalysisResponseDTO;
 import com.kdt03.fashion_api.domain.dto.FastApiAnalysisDTO;
@@ -41,6 +43,7 @@ public class ImageUploadService {
     private final WebClient webClient;
     private final MemberRepository memberRepo;
     private final NaverProductRepository naverProductRepo;
+    private final com.kdt03.fashion_api.repository.RecommandRepository recRepo;
 
     @Value("${SUPABASE_URL}")
     private String supabaseUrl;
@@ -56,10 +59,11 @@ public class ImageUploadService {
 
     public ImageUploadService(WebClient.Builder webClientBuilder, MemberRepository memberRepo,
             NaverProductRepository naverProductRepo,
+            com.kdt03.fashion_api.repository.RecommandRepository recRepo,
             @Value("${app.fastapi.url}") String fastApiUrl) {
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // 연결 타임아웃 5초
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000) // 연결 타임아웃 10초
                 .responseTimeout(Duration.ofSeconds(120)) // 전체 응답 타임아웃 120초 (분석 대기 고려)
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(120, TimeUnit.SECONDS))
@@ -71,6 +75,7 @@ public class ImageUploadService {
                 .build();
         this.memberRepo = memberRepo;
         this.naverProductRepo = naverProductRepo;
+        this.recRepo = recRepo;
     }
 
     @Transactional
@@ -184,13 +189,14 @@ public class ImageUploadService {
 
         FastApiAnalysisDTO fastApiResponse = null;
         List<SimilarProductDTO> similarProducts = new ArrayList<>();
+        List<SimilarProductDTO> internalProducts = new ArrayList<>();
 
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("file", file.getResource());
+            builder.part("files", file.getResource()).filename(file.getOriginalFilename());
 
             fastApiResponse = webClient.post()
-                    .uri("/embed")
+                    .uri("/analyze")
                     .body(BodyInserters.fromMultipartData(builder.build()))
                     .retrieve()
                     .bodyToMono(FastApiAnalysisDTO.class)
@@ -198,12 +204,10 @@ public class ImageUploadService {
 
             log.debug("FastAPI response: {}", fastApiResponse);
 
-            if (fastApiResponse != null) {
-                List<Double> embeddingList = fastApiResponse.getEmbedding();
-
-                if (embeddingList == null && fastApiResponse.getAnalysisResult() != null) {
-                    embeddingList = (List<Double>) fastApiResponse.getAnalysisResult().get("embedding");
-                }
+            if (fastApiResponse != null && fastApiResponse.getResults() != null
+                    && !fastApiResponse.getResults().isEmpty()) {
+                FastApiAnalysisDTO.Result firstResult = fastApiResponse.getResults().get(0);
+                List<Double> embeddingList = firstResult.getLatentVector();
 
                 if (embeddingList != null && !embeddingList.isEmpty()) {
                     String vectorString = embeddingList.stream()
@@ -222,10 +226,31 @@ public class ImageUploadService {
                                     p.getSimilarityScore()))
                             .collect(Collectors.toList());
 
-                    log.info("Found {} similar products.", similarProducts.size());
+                    internalProducts = recRepo.findTopSimilarInternalProducts(vectorString).stream()
+                            .map(p -> new SimilarProductDTO(
+                                    p.getProductId(),
+                                    p.getTitle(),
+                                    p.getPrice(),
+                                    p.getImageUrl(),
+                                    p.getProductLink(),
+                                    p.getSimilarityScore()))
+                            .collect(Collectors.toList());
+
+                    log.info("Found {} similar products and {} internal products.", similarProducts.size(),
+                            internalProducts.size());
                 } else {
-                    log.warn("No embedding found in FastAPI response.");
+                    log.warn("No latent_vector found in FastAPI response results.");
                 }
+            } else {
+                log.warn("FastAPI response is null or missing results array.");
+            }
+        } catch (org.springframework.web.reactive.function.client.WebClientResponseException e) {
+            String errorBody = e.getResponseBodyAsString();
+            log.error("FastAPI WebClientResponseException ({}): {}", e.getStatusCode(), errorBody);
+            if (fastApiResponse == null) {
+                fastApiResponse = FastApiAnalysisDTO.builder().error(errorBody).build();
+            } else {
+                fastApiResponse.setError(errorBody);
             }
         } catch (Exception e) {
             log.error("Error during uploadAndAnalyze: {}", e.getMessage(), e);
@@ -236,18 +261,30 @@ public class ImageUploadService {
             }
         }
 
-        Map<String, Object> finalAnalysisResult = (fastApiResponse != null
-                && fastApiResponse.getAnalysisResult() != null)
-                        ? fastApiResponse.getAnalysisResult()
-                        : (fastApiResponse != null ? Map.of("error", fastApiResponse.getError()) : new HashMap<>());
+        // Object Mapper를 이용해 DTO 전체 구조를 Map으로 안전하게 변환
+        Map<String, Object> finalAnalysisResultMap = new HashMap<>();
+        if (fastApiResponse != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            // 에러가 있는 경우 에러 담음
+            if (fastApiResponse.getError() != null) {
+                finalAnalysisResultMap.put("error", fastApiResponse.getError());
+                finalAnalysisResultMap.put("status", fastApiResponse.getStatus());
+            } else {
+                finalAnalysisResultMap = mapper.convertValue(fastApiResponse, new TypeReference<Map<String, Object>>() {
+                });
+            }
+        }
 
         AnalysisResponseDTO response = AnalysisResponseDTO.builder()
-                .analysisResult(finalAnalysisResult)
-                .similarProducts(similarProducts)
+                .analysisResult(finalAnalysisResultMap)
+                .naverProducts(similarProducts)
+                // 내부 상품을 AnalysisResponseDTO에 포함
+                .internalProducts(internalProducts)
                 .build();
 
-        log.info("Final response similarProducts count: {}",
-                (response.getSimilarProducts() != null ? response.getSimilarProducts().size() : 0));
+        log.info("Final response similarProducts count: {}, internalProducts count: {}",
+                (response.getNaverProducts() != null ? response.getNaverProducts().size() : 0),
+                (response.getInternalProducts() != null ? response.getInternalProducts().size() : 0));
         return response;
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kdt03.fashion_api.domain.dto.RecommendationResponseDTO;
 import com.kdt03.fashion_api.domain.dto.SimilarProductDTO;
 import com.kdt03.fashion_api.service.RecommandService;
 
@@ -27,10 +28,11 @@ public class RecommandController {
 
     private final RecommandService recommandService;
 
-    @Operation(summary = "상품 추천 (기본)", description = "상품 ID를 기반으로 AI 추천 상품 리스트를 반환합니다.")
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "추천 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "[{\"productId\": \"P005\", \"imageUrl\": \"http://...\", \"similarity\": 0.92}]")))
+    @Operation(summary = "상품 추천 (기본)", description = "상품 ID를 기반으로 네이버 및 내부 유사 상품 리스트를 반환합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "추천 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\n  \"naverProducts\": [{\"productId\": \"P005\", \"title\": \"네이버 상품\", \"price\": 10000, \"imageUrl\": \"http://...\", \"similarityScore\": 0.92}],\n  \"internalProducts\": [{\"productId\": \"I001\", \"title\": \"내부 상품\", \"price\": 12000, \"imageUrl\": \"http://...\", \"similarityScore\": 0.95}]\n}")))
     @GetMapping("/{productId}")
-    public List<SimilarProductDTO> recommand(@PathVariable String productId) {
+    public RecommendationResponseDTO recommand(
+            @Parameter(description = "기준이 될 상품 ID", required = true) @PathVariable("productId") String productId) {
         return recommandService.recommand(productId);
     }
 

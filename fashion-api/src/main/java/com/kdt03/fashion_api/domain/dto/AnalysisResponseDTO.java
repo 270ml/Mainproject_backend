@@ -14,5 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AnalysisResponseDTO {
     private Map<String, Object> analysisResult;
-    private List<SimilarProductDTO> similarProducts;
+    private List<SimilarProductDTO> naverProducts;
+    private List<SimilarProductDTO> internalProducts;
 }

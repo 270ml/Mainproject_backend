@@ -90,10 +90,20 @@ public class ImageUploadController {
             if (result.getAnalysisResult() != null) {
                 response.putAll(result.getAnalysisResult());
             }
-            response.put("similarProducts", result.getSimilarProducts());
+            response.put("naverProducts", result.getNaverProducts());
+            response.put("internalProducts", result.getInternalProducts());
 
             // 응답에서 임베딩값 제외
             response.remove("embedding");
+
+            if (response.containsKey("results") && response.get("results") instanceof java.util.List) {
+                java.util.List<?> resultsList = (java.util.List<?>) response.get("results");
+                for (Object resObj : resultsList) {
+                    if (resObj instanceof Map) {
+                        ((Map<?, ?>) resObj).remove("latent_vector");
+                    }
+                }
+            }
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
