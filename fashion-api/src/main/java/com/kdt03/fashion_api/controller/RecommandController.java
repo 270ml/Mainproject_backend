@@ -31,9 +31,29 @@ public class RecommandController {
     @Operation(summary = "상품 추천 (기본)", description = "상품 ID를 기반으로 네이버 및 내부 유사 상품 리스트를 반환합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "추천 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\n  \"naverProducts\": [{\"productId\": \"P005\", \"title\": \"네이버 상품\", \"price\": 10000, \"imageUrl\": \"http://...\", \"similarityScore\": 0.92}],\n  \"internalProducts\": [{\"productId\": \"I001\", \"title\": \"내부 상품\", \"price\": 12000, \"imageUrl\": \"http://...\", \"similarityScore\": 0.95}]\n}")))
     @GetMapping("/{productId}")
-    public RecommendationResponseDTO recommand(
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> recommand(
             @Parameter(description = "기준이 될 상품 ID", required = true) @PathVariable("productId") String productId) {
-        return recommandService.recommand(productId);
+        RecommendationResponseDTO result = recommandService.recommand(productId);
+
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("batch_size", 1);
+        response.put("latent_in_features", 2048);
+        response.put("total_latency_ms", 0.0);
+        response.put("gap_threshold", 0.1);
+        response.put("unknown_threshold", 0.65);
+        response.put("error", null);
+        response.put("device", "cpu");
+        response.put("latent_dim", 512);
+        response.put("status", null);
+        response.put("latent_source", "features");
+
+        // 빈 results 배열 추가
+        response.put("results", new java.util.ArrayList<>());
+
+        response.put("naverProducts", result.getNaverProducts());
+        response.put("internalProducts", result.getInternalProducts());
+
+        return org.springframework.http.ResponseEntity.ok(response);
     }
 
     @Operation(summary = "데모 유사 상품 조회 (ID)", description = "상품 ID를 기반으로 AI가 분석한 유사 상품 리스트를 반환하는 데모 API입니다.")
