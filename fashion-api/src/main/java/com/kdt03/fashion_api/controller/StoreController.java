@@ -22,7 +22,7 @@ public class StoreController {
     private final StoreService storeService;
 
     @Operation(summary = "전체 매장 목록 조회", description = "등록된 모든 매장 목록을 반환합니다.")
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "[\n  {\n    \"storeId\": \"online\",\n    \"storeName\": \"온라인 통합 센터\",\n    \"location\": \"서울시 강남구...\"\n  },\n  {\n    \"storeId\": \"gangnam_01\",\n    \"storeName\": \"9온스 강남점\",\n    \"location\": \"서울시 강남구 역삼동...\"\n  }\n]")))
     @GetMapping("/list")
     public ResponseEntity<List<StoreDTO>> getAllStores() {
         return ResponseEntity.ok(storeService.getAllStores());

@@ -1,6 +1,6 @@
 package com.kdt03.fashion_api.domain.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,5 +14,5 @@ public class SaveProductResponseDTO {
     private Integer price;
     private String imageUrl;
     private String productLink;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

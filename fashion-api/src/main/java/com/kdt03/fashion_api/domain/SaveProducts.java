@@ -1,20 +1,20 @@
 package com.kdt03.fashion_api.domain;
 
+import java.time.OffsetDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "save_products")
@@ -34,7 +34,8 @@ public class SaveProducts {
     @Column(name = "naver_product_id", nullable = false)
     private String naverProductId;
 
+    // DB 컬럼 타입이 timestamp with time zone이므로 OffsetDateTime 사용
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime createdAt;
 }

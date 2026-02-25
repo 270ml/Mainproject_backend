@@ -24,6 +24,7 @@ public class SalesController {
     private final SalesService salesService;
 
     @Operation(summary = "매장별 기간별 판매 순위 조회", description = "매장별 기간별 판매 순위 Top 5을 조회합니다. storeId 없으면 전체 매장, storeId=online이면 온라인 통합, 매장 ID 입력시 해당 매장 조회")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\n  \"storeId\": \"store_001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-03-31\",\n  \"ranks\": [\n    {\"productId\": \"P001\", \"title\": \"린넨 셔츠\", \"salesCount\": 150, \"rank\": 1},\n    {\"productId\": \"P002\", \"title\": \"슬림핏 슬랙스\", \"salesCount\": 120, \"rank\": 2}\n  ]\n}")))
     @GetMapping("/rank")
     public ResponseEntity<SalesRankRespDTO> getSalesByStore(
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -31,6 +32,5 @@ public class SalesController {
             @RequestParam(value = "storeId", required = false) String storeId) {
         return ResponseEntity.ok(salesService.getSalesByStore(startDate, endDate, storeId));
     }
-
 
 }

@@ -60,12 +60,14 @@ public class ProductController {
     }
 
     @Operation(summary = "나인온스 상품 개수 조회", description = "InternalProducts 테이블의 총 상품 개수를 반환합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "1250")))
     @GetMapping("/internal-count")
     public long getInternalProductCount() {
         return productService.getInternalProductCount();
     }
 
     @Operation(summary = "네이버 상품 개수 조회", description = "NaverProduct 테이블의 총 상품 개수를 반환합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "45200")))
     @GetMapping("/naver-count")
     public long getNaverProductCount() {
         return productService.getNaverProductCount();

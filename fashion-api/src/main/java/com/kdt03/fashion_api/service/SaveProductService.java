@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.kdt03.fashion_api.domain.SaveProducts;
 import com.kdt03.fashion_api.domain.dto.SaveProductRequestDTO;
@@ -12,9 +13,11 @@ import com.kdt03.fashion_api.repository.NaverProductRepository;
 import com.kdt03.fashion_api.repository.SaveProductRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SaveProductService {
 
     private final SaveProductRepository saveProductRepository;
@@ -23,7 +26,6 @@ public class SaveProductService {
 
     // 관심 상품 등록
     public void addSaveProduct(String memberId, SaveProductRequestDTO dto) {
-        // 회원 존재 여부 확인
         if (!memberRepository.existsById(memberId)) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }
@@ -45,7 +47,6 @@ public class SaveProductService {
             return java.util.Collections.emptyList();
         }
 
-        // N+1 문제 해결을 위해 NaverProduct IDs 추출 후 한 번에 조회
         List<String> productIds = saves.stream()
                 .map(SaveProducts::getNaverProductId)
                 .collect(Collectors.toList());
@@ -73,12 +74,22 @@ public class SaveProductService {
                 .collect(Collectors.toList());
     }
 
-    // 관심 상품 다건 삭제
-    @org.springframework.transaction.annotation.Transactional
-    public void deleteSaveProducts(java.util.List<Long> saveIds, String memberId) {
-        java.util.List<SaveProducts> saveProducts = saveProductRepository.findBySaveIdInAndMemberId(saveIds, memberId);
-        if (!saveProducts.isEmpty()) {
-            saveProductRepository.deleteAll(saveProducts);
+    // 관심 상품 다건 삭제 - naver_product_id 배열 + JWT에서 뽑은 memberId 기준으로 삭제
+    @Transactional
+    public void deleteSaveProducts(List<String> naverProductIds, String memberId) {
+        log.info("[DeleteSaveProducts] 요청 - memberId: {}, naverProductIds: {}", memberId, naverProductIds);
+
+        // member_id = memberId AND naver_product_id IN (naverProductIds) 조건으로 조회
+        List<SaveProducts> targets = saveProductRepository
+                .findByMemberIdAndNaverProductIdIn(memberId, naverProductIds);
+
+        log.info("[DeleteSaveProducts] 조회 결과: {}건 발견 (요청 {}건 중)", targets.size(), naverProductIds.size());
+
+        if (!targets.isEmpty()) {
+            saveProductRepository.deleteAll(targets);
+            log.info("[DeleteSaveProducts] DB 삭제 완료");
+        } else {
+            log.warn("[DeleteSaveProducts] 삭제 대상 없음 - memberId 또는 naverProductId 불일치 확인 필요");
         }
     }
 }

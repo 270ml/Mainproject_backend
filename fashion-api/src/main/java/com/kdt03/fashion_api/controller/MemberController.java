@@ -140,7 +140,7 @@ public class MemberController {
     }
 
     @Operation(summary = "로그아웃", description = "서버 세션을 무효화하고 로그아웃 처리합니다. (실제 처리는 SecurityConfig에서 수행)")
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "text/plain", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "로그아웃 성공")))
     @PostMapping("/logout")
     public void logout() {
         // SecurityConfig에서 처리

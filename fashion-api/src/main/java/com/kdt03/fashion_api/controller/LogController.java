@@ -31,6 +31,7 @@ public class LogController {
 
     // 로그 대시보드 HTML 반환
     @Operation(summary = "로그 대시보드 뷰", description = "서버 로그를 실시간으로 확인할 수 있는 웹 기반 대시보드 화면을 반환합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "HTML 대시보드 반환 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "text/html", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "<html>...</html>")))
     @GetMapping("/view")
     public ResponseEntity<String> logDashboard() {
         String html = """
@@ -154,6 +155,7 @@ public class LogController {
 
     // 원본 로그 데이터 반환
     @Operation(summary = "Raw 로그 데이터 조회", description = "서버의 fashion-api.log 파일에서 마지막 1000줄의 텍스트를 반환합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그 텍스트 반환 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "text/plain", examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "2024-03-21 15:30:00 [INFO] ...\n2024-03-21 15:30:01 [ERROR] ...")))
     @GetMapping("/raw")
     public ResponseEntity<String> rawLogs() throws IOException {
         List<String> lastLines = Files.readAllLines(Paths.get(getLogFilePath()));
@@ -162,10 +164,6 @@ public class LogController {
         String result = lastLines.stream()
                 .skip(Math.max(0, lastLines.size() - limit))
                 .collect(Collectors.joining("\n"));
-
-        if (!lastLines.isEmpty()) {
-            log.info("로그 조회 완료. 마지막 라인: {}", lastLines.getLast());
-        }
 
         return ResponseEntity.ok(result);
     }
