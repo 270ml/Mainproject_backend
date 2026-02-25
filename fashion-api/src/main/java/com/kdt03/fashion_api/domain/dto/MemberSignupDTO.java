@@ -16,4 +16,5 @@ public class MemberSignupDTO {
     private String nickname;
     private String password;
     private String provider;
+    private String storeId;
 }

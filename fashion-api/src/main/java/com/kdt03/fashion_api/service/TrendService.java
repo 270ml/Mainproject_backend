@@ -1,5 +1,23 @@
 package com.kdt03.fashion_api.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kdt03.fashion_api.domain.dto.MonthlyTrendDTO;
@@ -7,17 +25,9 @@ import com.kdt03.fashion_api.domain.dto.YearlyTrendDTO;
 import com.kdt03.fashion_api.repository.SalesRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TrendService {
@@ -25,7 +35,7 @@ public class TrendService {
 
     @Value("${naver.datalab.client-id}")
     private String CLIENT_ID;
-    
+
     @Value("${naver.datalab.client-secret}")
     private String CLIENT_SECRET;
 
@@ -45,7 +55,7 @@ public class TrendService {
             monthlyTrends.put(month, styleMap);
         }
 
-        for(Object[] r : results) {
+        for (Object[] r : results) {
             String monthStr = (String) r[0];
             String style = (String) r[1];
             Integer quantity = ((Number) r[2]).intValue();
@@ -57,16 +67,16 @@ public class TrendService {
         }
 
         List<MonthlyTrendDTO> monthlyList = monthlyTrends.entrySet().stream()
-            .map(e -> MonthlyTrendDTO.builder()
-                .month(e.getKey())
-                .styles(e.getValue())
-                .build())
+                .map(e -> MonthlyTrendDTO.builder()
+                        .month(e.getKey())
+                        .styles(e.getValue())
+                        .build())
                 .toList();
-        
+
         return YearlyTrendDTO.builder()
-                             .year(year)
-                             .data(monthlyList)
-                             .build();
+                .year(year)
+                .data(monthlyList)
+                .build();
     }
 
     public List<YearlyTrendDTO> getAllTrend() {
@@ -90,7 +100,7 @@ public class TrendService {
         }
 
         CompletableFuture.allOf(trendRequests.toArray(new CompletableFuture[0]))
-                 .thenAccept(v -> {
+                .thenAccept(v -> {
                     for (CompletableFuture<JsonNode> trend : trendRequests) {
                         try {
                             JsonNode resp = trend.get();
@@ -100,7 +110,7 @@ public class TrendService {
                             for (JsonNode result : resp.get("results")) {
                                 String title = result.get("title").asText();
                                 double sum = 0;
-                                
+
                                 for (JsonNode data : result.get("data")) {
                                     sum += data.get("ratio").asDouble();
                                 }
@@ -116,7 +126,7 @@ public class TrendService {
                                 for (Map.Entry<String, Double> entry : tempSums.entrySet()) {
                                     Map<String, Object> map = new HashMap<>();
                                     double relativeScore = entry.getValue() / feminineSum; // 합계 비율 계산
-                                
+
                                     map.put("style", entry.getKey());
                                     map.put("score", Math.round(relativeScore * 1000) / 1000.0); // 소수점 3자리
                                     finalResult.add(map);
@@ -137,25 +147,30 @@ public class TrendService {
         finalResult.sort((a, b) -> Double.compare((double) b.get("score"), (double) a.get("score")));
 
         double totalScore = finalResult.stream()
-                            .mapToDouble(m -> (double) m.get("score"))
-                            .sum();
+                .mapToDouble(m -> (double) m.get("score"))
+                .sum();
 
         if (totalScore > 0) {
+            // 시퀀스드 컬렉션 활용: 정렬된 결과에서 최상위(First) 및 최하위(Last) 요소에 접근
+            log.info("최고 선호도 스타일: {}, 최저 선호도 스타일: {}",
+                    finalResult.getFirst().get("style"),
+                    finalResult.getLast().get("style"));
+
             for (Map<String, Object> item : finalResult) {
                 double rawScore = (double) item.get("score");
-                
+
                 // 1. 순수 숫자 비중 계산
                 double percentage = (rawScore / totalScore) * 100;
                 double roundedPercentage = Math.round(percentage * 100) / 100.0;
-                
+
                 // 2. 숫자 데이터 (그래프 그리기용)
-                item.put("value", roundedPercentage); 
-                
+                item.put("value", roundedPercentage);
+
                 // 3. 퍼센트 기호가 붙은 문자열 (툴팁이나 텍스트 표시용)
                 item.put("percentStr", roundedPercentage + "%");
-                
+
                 // 원본 score 제거
-                item.remove("score"); 
+                item.remove("score");
             }
         }
 
@@ -177,7 +192,7 @@ public class TrendService {
             default -> style + "룩";
         };
     }
-   
+
     private CompletableFuture<JsonNode> fetchFromNaver(String[] keywords) {
         return CompletableFuture.supplyAsync(() -> {
             RestTemplate restTemplate = new RestTemplate();
@@ -196,18 +211,18 @@ public class TrendService {
             body.put("endDate", endDate.format(formatter));
             body.put("timeUnit", "month");
             body.put("category", "50000000");
-            body.put("ages", List.of("30","40","50"));
+            body.put("ages", List.of("30", "40", "50"));
             body.put("gender", "f");
 
             List<Map<String, Object>> keywordList = new ArrayList<>();
 
             keywordList.add(Map.of(
-                "name", "페미닌",
-                "param", List.of(getParamByStyle("페미닌"))
-            ));
+                    "name", "페미닌",
+                    "param", List.of(getParamByStyle("페미닌"))));
 
             for (String k : keywords) {
-                if ("페미닌".equals(k)) continue;
+                if ("페미닌".equals(k))
+                    continue;
 
                 keywordList.add(Map.of(
                         "name", k,

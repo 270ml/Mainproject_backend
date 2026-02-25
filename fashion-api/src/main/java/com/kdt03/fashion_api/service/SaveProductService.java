@@ -73,10 +73,12 @@ public class SaveProductService {
                 .collect(Collectors.toList());
     }
 
-    // 관심 상품 삭제
-    public void deleteSaveProduct(Long saveId, String memberId) {
-        SaveProducts saveProduct = saveProductRepository.findBySaveIdAndMemberId(saveId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 관심 상품을 찾을 수 없습니다."));
-        saveProductRepository.delete(saveProduct);
+    // 관심 상품 다건 삭제
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteSaveProducts(java.util.List<Long> saveIds, String memberId) {
+        java.util.List<SaveProducts> saveProducts = saveProductRepository.findBySaveIdInAndMemberId(saveIds, memberId);
+        if (!saveProducts.isEmpty()) {
+            saveProductRepository.deleteAll(saveProducts);
+        }
     }
 }

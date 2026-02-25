@@ -12,6 +12,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
+import org.springframework.beans.factory.annotation.Value;
+import com.kdt03.fashion_api.client.FastApiClient;
+import com.kdt03.fashion_api.client.InternalFastApiClient;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 
 @Configuration
 public class WebClientConfig {
@@ -38,7 +43,22 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient webClient(WebClient.Builder builder) {
-        return builder.build();
+    public FastApiClient fastApiClient(WebClient.Builder builder,
+            @Value("${app.fastapi.url}") String fastApiUrl) {
+        WebClient client = builder.baseUrl(fastApiUrl).build();
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+                .builderFor(WebClientAdapter.create(client))
+                .build();
+        return factory.createClient(FastApiClient.class);
+    }
+
+    @Bean
+    public InternalFastApiClient internalFastApiClient(WebClient.Builder builder,
+            @Value("${app.fastapi.internal.url}") String internalFastApiUrl) {
+        WebClient client = builder.baseUrl(internalFastApiUrl).build();
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+                .builderFor(WebClientAdapter.create(client))
+                .build();
+        return factory.createClient(InternalFastApiClient.class);
     }
 }

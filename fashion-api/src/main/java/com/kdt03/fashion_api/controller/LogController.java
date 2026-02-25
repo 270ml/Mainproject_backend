@@ -1,21 +1,23 @@
 package com.kdt03.fashion_api.controller;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "로그 관리 (Logs)", description = "서버 로그 모니터링 및 대시보드 관련 API")
+@Slf4j
 @RestController
 @RequestMapping("/api/logs")
 public class LogController {
@@ -160,6 +162,10 @@ public class LogController {
         String result = lastLines.stream()
                 .skip(Math.max(0, lastLines.size() - limit))
                 .collect(Collectors.joining("\n"));
+
+        if (!lastLines.isEmpty()) {
+            log.info("로그 조회 완료. 마지막 라인: {}", lastLines.getLast());
+        }
 
         return ResponseEntity.ok(result);
     }

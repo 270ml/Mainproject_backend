@@ -3,7 +3,6 @@ package com.kdt03.fashion_api.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,14 +43,14 @@ public class SaveProductController {
         return ResponseEntity.ok(saveProductService.getMySaveProducts(principal.getName()));
     }
 
-    @DeleteMapping("/{saveId}")
-    @Operation(summary = "관심 상품 삭제", description = "관심 상품을 삭제합니다.")
-    public ResponseEntity<?> deleteSaveProduct(
-            @PathVariable("saveId") Long saveId,
+    @DeleteMapping
+    @Operation(summary = "관심 상품 다건 삭제", description = "여러 개의 관심 상품을 한 번에 삭제합니다.")
+    public ResponseEntity<?> deleteSaveProducts(
+            @RequestBody java.util.List<Long> saveIds,
             java.security.Principal principal) {
         if (principal == null)
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        saveProductService.deleteSaveProduct(saveId, principal.getName());
-        return ResponseEntity.ok().body("관심 상품이 삭제되었습니다.");
+        saveProductService.deleteSaveProducts(saveIds, principal.getName());
+        return ResponseEntity.ok().body("선택한 관심 상품이 삭제되었습니다.");
     }
 }

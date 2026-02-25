@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kdt03.fashion_api.domain.dto.AnalysisResponseDTO;
 import com.kdt03.fashion_api.domain.dto.RecommendationResponseDTO;
+import com.kdt03.fashion_api.domain.dto.Internal768RecommendationResponseDTO;
 import com.kdt03.fashion_api.service.ImageUploadService;
 import com.kdt03.fashion_api.service.RecommandService;
 
@@ -64,11 +65,10 @@ public class RecommandController {
             // 응답에서 임베딩값 제외
             response.remove("embedding");
 
-            if (response.containsKey("results") && response.get("results") instanceof java.util.List) {
-                java.util.List<?> resultsList = (java.util.List<?>) response.get("results");
+            if (response.get("results") instanceof java.util.List<?> resultsList) {
                 for (Object resObj : resultsList) {
-                    if (resObj instanceof java.util.Map) {
-                        ((java.util.Map<?, ?>) resObj).remove("latent_vector");
+                    if (resObj instanceof java.util.Map<?, ?> resMap) {
+                        resMap.remove("latent_vector");
                     }
                 }
             }
@@ -76,6 +76,19 @@ public class RecommandController {
             return org.springframework.http.ResponseEntity.ok(response);
         } catch (Exception e) {
             return org.springframework.http.ResponseEntity.internalServerError().body("서버 오류: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "768차원 이미지 분석 및 내부 추천", description = "이미지를 업로드하고 768차원 분석 서버(8001)를 통해 내부 유사 상품을 추천받습니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "분석 및 추천 성공", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Internal768RecommendationResponseDTO.class)))
+    @PostMapping(value = "/768/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> analyze768(
+            @Parameter(description = "분석할 이미지 파일", required = true) @RequestParam("file") MultipartFile file) {
+        try {
+            Internal768RecommendationResponseDTO result = recommandService.analyzeInternal768(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("서버 오류: " + e.getMessage());
         }
     }
 

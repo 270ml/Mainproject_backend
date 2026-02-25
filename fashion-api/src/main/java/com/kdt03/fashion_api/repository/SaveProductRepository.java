@@ -11,6 +11,8 @@ public interface SaveProductRepository extends JpaRepository<SaveProducts, Long>
     List<SaveProducts> findByMemberId(String memberId);
 
     Optional<SaveProducts> findBySaveIdAndMemberId(Long saveId, String memberId);
-    
+
+    List<SaveProducts> findBySaveIdInAndMemberId(List<Long> saveIds, String memberId);
+
     boolean existsByMemberIdAndNaverProductId(String memberId, String naverProductId);
 }

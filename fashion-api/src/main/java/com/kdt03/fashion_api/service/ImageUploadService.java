@@ -10,9 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +35,7 @@ public class ImageUploadService {
     private final MemberRepository memberRepo;
     private final NaverProductRepository naverProductRepo;
     private final com.kdt03.fashion_api.repository.RecommandRepository recRepo;
+    private final com.kdt03.fashion_api.client.FastApiClient fastApiClient;
 
     @Value("${SUPABASE_URL}")
     private String supabaseUrl;
@@ -53,15 +52,13 @@ public class ImageUploadService {
     public ImageUploadService(WebClient.Builder webClientBuilder, MemberRepository memberRepo,
             NaverProductRepository naverProductRepo,
             com.kdt03.fashion_api.repository.RecommandRepository recRepo,
-            @Value("${app.fastapi.url}") String fastApiUrl) {
+            com.kdt03.fashion_api.client.FastApiClient fastApiClient) {
 
-        this.webClient = webClientBuilder
-                .clone()
-                .baseUrl(fastApiUrl)
-                .build();
+        this.webClient = webClientBuilder.build();
         this.memberRepo = memberRepo;
         this.naverProductRepo = naverProductRepo;
         this.recRepo = recRepo;
+        this.fastApiClient = fastApiClient;
     }
 
     @Transactional
@@ -100,17 +97,7 @@ public class ImageUploadService {
         CompletableFuture<Map<String, Object>> fastApiTask = CompletableFuture.supplyAsync(() -> {
             try {
                 log.info("Starting FastAPI upload for {}", savedFilename);
-                MultipartBodyBuilder builder = new MultipartBodyBuilder();
-                builder.part("file", file.getResource());
-
-                Map<String, Object> response = webClient.post()
-                        .uri("/upload-image")
-                        .body(BodyInserters.fromMultipartData(builder.build()))
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                        })
-                        .block();
-
+                Map<String, Object> response = fastApiClient.uploadImage(file.getResource());
                 log.info("FastAPI upload completed for {}", savedFilename);
                 return response != null ? response : new HashMap<>();
             } catch (Exception e) {
@@ -170,6 +157,7 @@ public class ImageUploadService {
         }
     }
 
+    @org.springframework.cache.annotation.Cacheable(value = "analysisResults", key = "#file.originalFilename + #file.size")
     public AnalysisResponseDTO uploadAndAnalyze(MultipartFile file) throws IOException {
         log.info("Processing uploadAndAnalyze for file: {}", file.getOriginalFilename());
 
@@ -178,15 +166,7 @@ public class ImageUploadService {
         List<SimilarProductDTO> internalProducts = new ArrayList<>();
 
         try {
-            MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("file", file.getResource()).filename(file.getOriginalFilename());
-
-            fastApiResponse = webClient.post()
-                    .uri("/vector")
-                    .body(BodyInserters.fromMultipartData(builder.build()))
-                    .retrieve()
-                    .bodyToMono(FastApiAnalysisDTO.class)
-                    .block();
+            fastApiResponse = fastApiClient.analyzeVector(file.getResource());
 
             log.debug("FastAPI response: {}", fastApiResponse);
 
