@@ -14,12 +14,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "naver_product_vectors_512")
+@Table(name = "nineounce_product_vectors_512")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class NaverProductVectors512 {
+public class NineounceProductVectors512 {
 
     @Id
     @Column(name = "product_id")

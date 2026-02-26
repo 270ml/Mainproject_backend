@@ -7,26 +7,39 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kdt03.fashion_api.domain.NineounceProductVectors512;
+import com.kdt03.fashion_api.domain.NineounceProductVectors768;
 import com.kdt03.fashion_api.domain.dto.Internal768AnalysisDTO;
 import com.kdt03.fashion_api.domain.dto.Internal768RecommendationResponseDTO;
 import com.kdt03.fashion_api.domain.dto.RecommendationResponseDTO;
 import com.kdt03.fashion_api.domain.dto.SimilarProductDTO;
+import com.kdt03.fashion_api.repository.NineounceProductVectors512Repository;
+import com.kdt03.fashion_api.repository.NineounceProductVectors768Repository;
 import com.kdt03.fashion_api.repository.RecommandRepository;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 public class RecommandService {
         private final RecommandRepository recRepo;
         private final com.kdt03.fashion_api.client.InternalFastApiClient internalFastApiClient;
+        private final NineounceProductVectors512Repository vectors512Repository;
+        private final NineounceProductVectors768Repository vectors768Repository;
 
         public RecommandService(RecommandRepository recRepo,
-                        com.kdt03.fashion_api.client.InternalFastApiClient internalFastApiClient) {
+                        com.kdt03.fashion_api.client.InternalFastApiClient internalFastApiClient,
+                        NineounceProductVectors512Repository vectors512Repository,
+                        NineounceProductVectors768Repository vectors768Repository) {
                 this.recRepo = recRepo;
                 this.internalFastApiClient = internalFastApiClient;
+                this.vectors512Repository = vectors512Repository;
+                this.vectors768Repository = vectors768Repository;
         }
 
+        @Transactional(readOnly = true)
         public RecommendationResponseDTO recommand(String productId) {
                 log.info("Finding similar products for Nineounce product: {}", productId);
 
@@ -52,6 +65,9 @@ public class RecommandService {
                                                 p.getSimilarityScore()))
                                 .toList();
 
+                // 3. 기준 상품 스타일 상세 정보 페칭 (512차원)
+                NineounceProductVectors512 v512 = vectors512Repository.findById(productId).orElse(null);
+
                 log.info("Found {} naver and {} internal similar products.", naverResults.size(),
                                 internalResults.size());
 
@@ -64,9 +80,22 @@ public class RecommandService {
                 return RecommendationResponseDTO.builder()
                                 .naverProducts(naverResults)
                                 .internalProducts(internalResults)
+                                .targetTop1Style(v512 != null && v512.getTop1Style() != null
+                                                ? v512.getTop1Style().getStyleName()
+                                                : null)
+                                .targetTop1Score(v512 != null ? v512.getTop1Score() : null)
+                                .targetTop2Style(v512 != null && v512.getTop2Style() != null
+                                                ? v512.getTop2Style().getStyleName()
+                                                : null)
+                                .targetTop2Score(v512 != null ? v512.getTop2Score() : null)
+                                .targetTop3Style(v512 != null && v512.getTop3Style() != null
+                                                ? v512.getTop3Style().getStyleName()
+                                                : null)
+                                .targetTop3Score(v512 != null ? v512.getTop3Score() : null)
                                 .build();
         }
 
+        @Transactional(readOnly = true)
         public RecommendationResponseDTO recommand768(String productId) {
                 log.info("Finding 768-dim similar products for Nineounce product: {}", productId);
 
@@ -92,12 +121,27 @@ public class RecommandService {
                                                 p.getSimilarityScore()))
                                 .toList();
 
+                // 3. 기준 상품 스타일 상세 정보 페칭 (768차원)
+                NineounceProductVectors768 v768 = vectors768Repository.findById(productId).orElse(null);
+
                 log.info("Found {} naver and {} internal similar products (768-dim).", naverResults.size(),
                                 internalResults.size());
 
                 return RecommendationResponseDTO.builder()
                                 .naverProducts(naverResults)
                                 .internalProducts(internalResults)
+                                .targetTop1Style(v768 != null && v768.getStyleTop1() != null
+                                                ? v768.getStyleTop1().getStyleName()
+                                                : null)
+                                .targetTop1Score(v768 != null ? v768.getStyleScore1() : null)
+                                .targetTop2Style(v768 != null && v768.getStyleTop2() != null
+                                                ? v768.getStyleTop2().getStyleName()
+                                                : null)
+                                .targetTop2Score(v768 != null ? v768.getStyleScore2() : null)
+                                .targetTop3Style(v768 != null && v768.getStyleTop3() != null
+                                                ? v768.getStyleTop3().getStyleName()
+                                                : null)
+                                .targetTop3Score(v768 != null ? v768.getStyleScore3() : null)
                                 .build();
         }
 

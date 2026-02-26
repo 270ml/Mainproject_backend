@@ -14,35 +14,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "naver_product_vectors_512")
+@Table(name = "nineounce_product_vectors_768")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class NaverProductVectors512 {
+public class NineounceProductVectors768 {
 
     @Id
     @Column(name = "product_id")
     private String productId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "top1_style")
-    private Styles top1Style;
+    @JoinColumn(name = "style_top1")
+    private Styles styleTop1;
 
-    @Column(name = "top1_score")
-    private Double top1Score;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "top2_style")
-    private Styles top2Style;
-
-    @Column(name = "top2_score")
-    private Double top2Score;
+    @Column(name = "style_score1")
+    private Double styleScore1;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "top3_style")
-    private Styles top3Style;
+    @JoinColumn(name = "style_top2")
+    private Styles styleTop2;
 
-    @Column(name = "top3_score")
-    private Double top3Score;
+    @Column(name = "style_score2")
+    private Double styleScore2;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "style_top3")
+    private Styles styleTop3;
+
+    @Column(name = "style_score3")
+    private Double styleScore3;
 }

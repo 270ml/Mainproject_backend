@@ -1,7 +1,17 @@
 package com.kdt03.fashion_api.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "naver_product_vectors_768")
@@ -14,9 +24,6 @@ public class NaverProductVectors768 {
     @Id
     @Column(name = "product_id")
     private String productId;
-
-    @Column(columnDefinition = "vector")
-    private float[] embedding;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "style_top1")
