@@ -17,6 +17,9 @@ public class SaveProductResponseDTO {
     private String productLink;
     private OffsetDateTime createdAt;
 
+    // 유저가 등록 시 선택한 스타일
+    private String userStyle;
+
     // 512차원 스타일 정보
     private String styleTop1_512;
     private Double styleScore1_512;

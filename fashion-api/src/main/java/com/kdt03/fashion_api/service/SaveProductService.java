@@ -69,25 +69,26 @@ public class SaveProductService {
 
         List<String> productIds = saves.stream()
                 .map(SaveProducts::getNaverProductId)
+                .distinct()
                 .collect(Collectors.toList());
 
         // 1. 네이버 상품 정보 조회
         java.util.Map<String, NaverProducts> productMap = naverProductRepository
                 .findAllById(productIds).stream()
                 .collect(Collectors.toMap(NaverProducts::getProductId,
-                        java.util.function.Function.identity()));
+                        java.util.function.Function.identity(), (existing, replacement) -> existing));
 
         // 2. 512차원 스타일 정보 조회
         java.util.Map<String, NaverProductVectors512> vectors512Map = naverVectors512Repository
                 .findAllById(productIds).stream()
                 .collect(Collectors.toMap(NaverProductVectors512::getProductId,
-                        java.util.function.Function.identity()));
+                        java.util.function.Function.identity(), (existing, replacement) -> existing));
 
         // 3. 768차원 스타일 정보 조회
         java.util.Map<String, NaverProductVectors768> vectors768Map = naverVectors768Repository
                 .findAllById(productIds).stream()
                 .collect(Collectors.toMap(NaverProductVectors768::getProductId,
-                        java.util.function.Function.identity()));
+                        java.util.function.Function.identity(), (existing, replacement) -> existing));
 
         return saves.stream()
                 .map(save -> {
