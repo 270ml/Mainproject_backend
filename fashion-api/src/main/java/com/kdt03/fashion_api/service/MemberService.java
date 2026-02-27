@@ -20,7 +20,6 @@ public class MemberService {
     private final MemberRepository memberRepo;
     private final PasswordEncoder passwordEncoder;
     private final ImageUploadService imageUploadService;
-    private final com.kdt03.fashion_api.repository.StoreRepository storeRepo;
 
     // 회원가입 (프로필 이미지 선택사항)
     @Transactional
@@ -28,15 +27,11 @@ public class MemberService {
         String raw = dto.getPassword();
         String encoded = passwordEncoder.encode(raw);
 
-        com.kdt03.fashion_api.domain.Stores store = storeRepo.findById(dto.getStoreId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상점입니다."));
-
         Member member = Member.builder()
                 .id(dto.getId())
                 .nickname(dto.getNickname())
                 .password(encoded)
                 .provider("local")
-                .store(store)
                 .build();
 
         memberRepo.save(member);

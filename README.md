@@ -160,18 +160,16 @@ erDiagram
         string id UK
         string password
         string nickname
-        string provider "OAuth2 제공자 (Local, Google, Naver...)"
-        string store_id FK
+        string provider "OAuth2 로그인(Local, Google 등)"
+        string profile
     }
     stores {
         string store_id PK
         string store_name
     }
-    
-    stores ||--o{ member : "소속"
 
     %% ==========================================
-    %% 2. 상품 및 메타데이터 도메인 (Product & Meta)
+    %% 2. 메타데이터 도메인 (Category & Style)
     %% ==========================================
     categories {
         string category_id PK
@@ -181,14 +179,17 @@ erDiagram
         string style_id PK
         string style_name
     }
-    
+
+    %% ==========================================
+    %% 3. 상품 도메인 (Products)
+    %% ==========================================
     nineounce_products {
         string product_id PK
         string product_name
         int price
         string image_url
         string category_id FK
-        string style_id FK "대표 스타일"
+        string style_id FK
     }
     naver_products {
         string product_id PK
@@ -197,7 +198,7 @@ erDiagram
         string product_link
         string image_url
         string category_id FK
-        string style_id FK "대표 스타일"
+        string style_id FK
     }
 
     categories ||--o{ nineounce_products : "분류"
@@ -206,13 +207,13 @@ erDiagram
     styles ||--o{ naver_products : "스타일 지정"
 
     %% ==========================================
-    %% 3. 위시리스트 및 판매 로그 도메인 (Action & Log)
+    %% 4. 트랜잭션 도메인 (Action & Log)
     %% ==========================================
     save_products {
         bigint save_id PK
         string member_id FK
         string naver_product_id FK
-        string style_id FK "유저가 지정한 스타일"
+        string style_id FK 
         timestamp created_at
     }
     sales {
@@ -229,42 +230,54 @@ erDiagram
         date sale_date
     }
 
-    member ||--o{ save_products : "위시리스트 추가"
-    naver_products ||--o{ save_products : "포함됨"
-    nineounce_products ||--o{ sales : "판매 발생"
-    nineounce_products ||--o{ sales_log : "기록됨"
-    stores ||--o{ sales_log : "가게별 통계"
+    member ||--o{ save_products : "추가"
+    naver_products ||--o{ save_products : "대상"
+    nineounce_products ||--o{ sales : "판매"
+    nineounce_products ||--o{ sales_log : "기록"
+    stores ||--o{ sales_log : "통계"
 
     %% ==========================================
-    %% 4. AI 벡터 및 3D 추천 도메인 (AI & Vector)
+    %% 5. AI 모델링 도메인 (Vectors & 3D)
     %% ==========================================
     naver_product_vectors_512 {
         string product_id FK
-        vector embedding "512D 벡터"
-        string top1_style FK
         float top1_score
+        string top1_style FK
     }
     naver_product_vectors_768 {
         string product_id FK
-        vector embedding "768D 벡터"
+        float style_score1
         string style_top1 FK
     }
     nineounce_product_vectors_512 {
         string product_id FK
-        vector embedding "512D 벡터"
+        float top1_score
         string top1_style FK
+    }
+    nineounce_product_vectors_768 {
+        string product_id FK
+        float style_score1
+        string style_top1 FK
     }
     nineounce_xyz_512 {
         string product_id FK
         float x 
         float y 
-        float z "3D 맵핑용"
+        float z 
+        string top1_style FK
+    }
+    nineounce_xyz_768 {
+        string product_id FK
+        float x 
+        float y 
+        float z 
         string top1_style FK
     }
 
-    naver_products ||--o| naver_product_vectors_512 : "512D 임베딩"
-    naver_products ||--o| naver_product_vectors_768 : "768D 임베딩"
-    
-    nineounce_products ||--o| nineounce_product_vectors_512 : "512D 임베딩"
-    nineounce_products ||--o| nineounce_xyz_512 : "3D 모델링 (512)"
+    naver_products ||--o| naver_product_vectors_512 : "512D"
+    naver_products ||--o| naver_product_vectors_768 : "768D"
+    nineounce_products ||--o| nineounce_product_vectors_512 : "512D"
+    nineounce_products ||--o| nineounce_product_vectors_768 : "768D"
+    nineounce_products ||--o| nineounce_xyz_512 : "3D(512)"
+    nineounce_products ||--o| nineounce_xyz_768 : "3D(768)"
 ```

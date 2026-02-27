@@ -62,7 +62,6 @@ public class MemberController {
                 .id(id)
                 .password(password)
                 .nickname(nickname)
-                .storeId(storeId)
                 .build();
 
         memberService.signup(dto, profileImage);
