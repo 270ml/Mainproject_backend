@@ -11,4 +11,5 @@ public class ProductMapDTO {
     private String style;
     private Double xCoord;
     private Double yCoord;
+    private Double zCoord;
 }

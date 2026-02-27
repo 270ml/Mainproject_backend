@@ -27,18 +27,18 @@ public interface ProductRepository extends JpaRepository<InternalProducts, Strin
                         + " from InternalProducts p left join p.category c where p.productId = :productId")
         Optional<ProductDTO> findProductById(@Param("productId") String productId);
 
-        @Query("select new com.kdt03.fashion_api.domain.dto.ProductMapDTO(p.productId, p.productName, s.styleName, v.x, v.y) "
+        @Query("select new com.kdt03.fashion_api.domain.dto.ProductMapDTO(p.productId, p.productName, s.styleName, v.x, v.y, v.z) "
                         + "from InternalProducts p "
-                        + "join NineounceXy512 v on v.productId = p.productId "
+                        + "join NineounceXyz512 v on v.productId = p.productId "
                         + "left join p.style s "
-                        + "where p.style is not null and v.x is not null and v.y is not null")
+                        + "where p.style is not null and v.x is not null and v.y is not null and v.z is not null")
         List<com.kdt03.fashion_api.domain.dto.ProductMapDTO> findAllProductMaps512();
 
-        @Query("select new com.kdt03.fashion_api.domain.dto.ProductMapDTO(p.productId, p.productName, s.styleName, v.x, v.y) "
+        @Query("select new com.kdt03.fashion_api.domain.dto.ProductMapDTO(p.productId, p.productName, s.styleName, v.x, v.y, v.z) "
                         + "from InternalProducts p "
-                        + "join NineounceXy768 v on v.productId = p.productId "
+                        + "join NineounceXyz768 v on v.productId = p.productId "
                         + "left join p.style s "
-                        + "where p.style is not null and v.x is not null and v.y is not null")
+                        + "where p.style is not null and v.x is not null and v.y is not null and v.z is not null")
         List<com.kdt03.fashion_api.domain.dto.ProductMapDTO> findAllProductMaps768();
 
         @Query("SELECT new com.kdt03.fashion_api.domain.dto.StyleCountDTO(s.styleName, COUNT(p)) " +

@@ -41,9 +41,21 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String username = jwtUtil.getClaim(jwtToken, JWTUtil.usernameClaim);
-        String provider = jwtUtil.getClaim(jwtToken, JWTUtil.providerClaim);
-        String email = jwtUtil.getClaim(jwtToken, JWTUtil.emailClaim);
+        String username = null;
+        String provider = null;
+        String email = null;
+
+        try {
+            username = jwtUtil.getClaim(jwtToken, JWTUtil.usernameClaim);
+            provider = jwtUtil.getClaim(jwtToken, JWTUtil.providerClaim);
+            email = jwtUtil.getClaim(jwtToken, JWTUtil.emailClaim);
+        } catch (com.auth0.jwt.exceptions.JWTVerificationException e) {
+            System.out.println("[JWTAuthorizationFilter] JWT Token invalid or expired: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"success\": false, \"message\": \"인증 토큰이 만료되었거나 유효하지 않습니다.\"}");
+            return;
+        }
 
         User user = null;
         Optional<Member> opt = memberRepo.findById(username);

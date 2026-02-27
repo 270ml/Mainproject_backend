@@ -12,4 +12,5 @@ public class ProductMapColumnDTO {
     private List<String> styles;
     private List<Double> xCoords;
     private List<Double> yCoords;
+    private List<Double> zCoords;
 }

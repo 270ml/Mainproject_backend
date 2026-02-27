@@ -41,6 +41,7 @@ public class ProductService {
                 .styles(list.stream().map(ProductMapDTO::getStyle).toList())
                 .xCoords(list.stream().map(ProductMapDTO::getXCoord).toList())
                 .yCoords(list.stream().map(ProductMapDTO::getYCoord).toList())
+                .zCoords(list.stream().map(ProductMapDTO::getZCoord).toList())
                 .build();
     }
 
@@ -53,6 +54,7 @@ public class ProductService {
                 .styles(list.stream().map(ProductMapDTO::getStyle).toList())
                 .xCoords(list.stream().map(ProductMapDTO::getXCoord).toList())
                 .yCoords(list.stream().map(ProductMapDTO::getYCoord).toList())
+                .zCoords(list.stream().map(ProductMapDTO::getZCoord).toList())
                 .build();
     }
 

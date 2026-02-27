@@ -6,18 +6,18 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.kdt03.fashion_api.domain.SaveProducts;
-import com.kdt03.fashion_api.domain.Styles;
-import com.kdt03.fashion_api.domain.NaverProducts;
 import com.kdt03.fashion_api.domain.NaverProductVectors512;
 import com.kdt03.fashion_api.domain.NaverProductVectors768;
+import com.kdt03.fashion_api.domain.NaverProducts;
+import com.kdt03.fashion_api.domain.SaveProducts;
+import com.kdt03.fashion_api.domain.Styles;
 import com.kdt03.fashion_api.domain.dto.SaveProductRequestDTO;
 import com.kdt03.fashion_api.domain.dto.SaveProductResponseDTO;
-import com.kdt03.fashion_api.repository.NaverProductRepository;
-import com.kdt03.fashion_api.repository.SaveProductRepository;
 import com.kdt03.fashion_api.repository.MemberRepository;
+import com.kdt03.fashion_api.repository.NaverProductRepository;
 import com.kdt03.fashion_api.repository.NaverProductVectors512Repository;
 import com.kdt03.fashion_api.repository.NaverProductVectors768Repository;
+import com.kdt03.fashion_api.repository.SaveProductRepository;
 import com.kdt03.fashion_api.repository.StylesRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -107,6 +107,7 @@ public class SaveProductService {
                             .imageUrl(naver.getImageUrl())
                             .productLink(naver.getProductLink())
                             .createdAt(save.getCreatedAt())
+                            .userStyle(save.getStyle() != null ? save.getStyle().getStyleName() : null)
                             .styleTop1_512(
                                     v512 != null && v512.getTop1Style() != null ? v512.getTop1Style().getStyleName()
                                             : null)
