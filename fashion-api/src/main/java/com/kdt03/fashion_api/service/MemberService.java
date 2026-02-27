@@ -52,7 +52,7 @@ public class MemberService {
         } else {
             System.out.println("MemberService: 프로필 이미지 없음 (null 확인됨) - 기본 이미지 설정");
             member.setProfile(
-                    "https://fjoylosbfvojioljibku.supabase.co/storage/v1/object/public/profileimage/defalutprofile.svg");
+                    "https://fjoylosbfvojioljibku.supabase.co/storage/v1/object/public/profileimage/default.svg");
             memberRepo.save(member);
         }
     }

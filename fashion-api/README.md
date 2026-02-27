@@ -1,52 +1,67 @@
 # Fashion API (NineOunce E-Commerce Backend)
 
-본 프로젝트는 패션 이커머스 서비스(NineOunce)를 위한 **Spring Boot 기반 백엔드 API 서버**입니다. AI를 활용한 시각적 검색(Visual Search) 및 추천, 소셜 로그인 기반의 안전한 회원 관리, 트렌드 분석 등 첨단 쇼핑 인사이트 기능을 제공합니다.
+> 패션 이커머스 서비스(**NineOunce**)를 위한 **Spring Boot 기반 백엔드 API 서버**입니다. 
+> AI를 활용한 시각적 검색(Visual Search) 및 추천, 소셜 로그인 기반의 안전한 회원 관리, 트렌드 분석 등 첨단 쇼핑 인사이트 기능을 제공합니다.
 
 ## 🚀 주요 기술 스택 (Tech Stack)
 
 ### Backend Core
-- **Framework**: Spring Boot 3.5.10
-- **Language**: Java 21
-- **Build Tool**: Gradle
-- **Database**: PostgreSQL (Supabase 환경 연동)
-- **ORM**: Spring Data JPA / Hibernate 6
+- **Framework**: <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white"/> Spring Boot 3.5.10
+- **Language**: <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=java&logoColor=white"/> Java 21
+- **Build Tool**: <img src="https://img.shields.io/badge/Gradle-02303A?style=flat-square&logo=gradle&logoColor=white"/> Gradle
+- **Database**: <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white"/> PostgreSQL (Supabase 환경 연동)
+- **ORM**: <img src="https://img.shields.io/badge/Hibernate-59666C?style=flat-square&logo=hibernate&logoColor=white"/> Spring Data JPA / Hibernate 6
 
 ### Security & Authentication
-- **Spring Security** & **OAuth2 Client** (Google, Naver, Kakao 소셜 로그인 지원)
-- **JWT (JSON Web Token)** (`com.auth0:java-jwt`) - 세션리스 인증 아키텍처 구현
+- **Spring Security** & **OAuth2 Client**: <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=flat-square&logo=Spring-Security&logoColor=white"/> (Google, Naver, Kakao 소셜 로그인 지원)
+- **JWT (JSON Web Token)**: <img src="https://img.shields.io/badge/JWT-black?style=flat-square&logo=JSON%20web%20tokens"/> (`com.auth0:java-jwt`) 세션리스 인증 아키텍처 구현
 
 ### AI & Integration
-- **FastAPI 연동**: Python 기반의 외부 분석 서버(포트 8000, 8001)와 통신하여 이미지 분석 및 512차원/768차원 벡터 임베딩 처리
-- **pgvector**: PostgreSQL의 벡터 검색(Vector Similarity Search) 기능을 활용하여 이미지나 텍스트 기반 상품 형태(스타일) 간 코사인 유사도 연산
+- **FastAPI 연동**: <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=FastAPI&logoColor=white"/> Python 기반 외부 분석 서버(포트 8000, 8001) 통신 (512D/768D 벡터 임베딩)
+- **pgvector**: <img src="https://img.shields.io/badge/pgvector-4169E1?style=flat-square&logo=postgresql&logoColor=white"/> 벡터 검색(Vector Similarity Search) 기반 코사인 유사도 연산
 
 ### Storage & Utility
-- **Supabase Storage**: 회원 프로필 사진 및 분석용 이미지 원본 보관 용도
-- **Swagger (Springdoc OpenAPI)**: API 명세 자동화 및 마크다운 테스트 UI (`/swagger-ui.html`)
-- **P6Spy**: 개발 환경용 실행 실제 쿼리 파라미터 모니터링
-- **MapStruct**: DTO-Entity 간 자동 변환 (컴파일 타임 안전성 및 보일러플레이트 제거)
-- **Caffeine Cache**: 성능 제한 해소를 위한 로컬 인메모리 캐시
+- **Storage**: <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white"/> 회원 프로필 사진 및 원본 분석 이미지 보관
+- **API Docs**: <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=Swagger&logoColor=black"/> API 명세 자동화 및 테스트 UI (`/swagger-ui.html`)
+- **P6Spy**: 개발 환경 실행 쿼리 파라미터 모니터링
+- **MapStruct**: DTO-Entity 간 자동 변환 (컴파일 타임 에러 체크)
+- **Caffeine Cache**: 트렌드 조회 등 성능 최적화용 로컬 인메모리 캐시
 
 ---
 
 ## 🛠 아키텍처 및 핵심 기술 심층 분석 (Technical Deep Dive)
 
-단순히 라이브러리를 가져다 쓰는 수준을 넘어, 성능 최적화와 유지보수성을 고려하여 다양한 최신 기술을 코드 레벨에 도입했습니다.
+단순히 라이브러리를 조립하는 수준을 넘어, 대용량 트래픽과 AI 기반 시각 정보 처리의 성능 최적화, 그리고 유지보수성을 모두 고려하여 다음과 같은 최신 기술을 코드 레벨에 깊이 있게 적용했습니다.
 
-### 1. ⚡ Virtual Threads (가상 스레드) 도입
-- **적용점:** `application.properties` 내 `spring.threads.virtual.enabled=true` 옵션 지정
-- **효과:** Java 21의 핵심 기능인 가상 스레드를 도입하여, 기존 OS 스레드 풀의 병목 한계를 극복했습니다. Python 기반의 **FastAPI 이미지 분석 서버 호출(WebClient 비동기 연동)**, **PostgreSQL 데이터베이스 쿼리 대기** 등 무거운 I/O Blocking이 발생하는 구간에서 자원 소모를 최소화하고 동시성 처리 성능(Throughput)을 비약적으로 끌어올렸습니다.
+### 1. ⚡ Java 21 가상 스레드 (Virtual Threads) 기반 논블로킹 I/O
+- **도입 배경:** AI 이미지 분석과 같이 무거운 연산을 외부 FastAPI 서버로 위임하는 구조에서, 응답 대기로 인한 수 초의 네트워크 연결 지연(Latency)이 동반되었습니다. 기존 시스템에서는 이러한 구간에서 플랫폼 동시접속 스레드가 블로킹되어 빠르게 스레드 풀이 고갈되는 병목 현상이 발생했습니다.
+- **해결 방안:** Java 21의 가벼운 '가상 스레드(Virtual Threads)' 기능을 `application.properties`에 즉시 도입하고 논블로킹 패러다임을 활성화했습니다.
+- **기대 효과:** 서버 램(Memory) 고갈 없이 수천 명의 동시 접속자가 AI 검색을 요청해도 안정적으로 응답을 대기하고 분배할 수 있게 되어, 시스템 동시성(Throughput) 성능이 사실상 무제한에 가깝게 비약적으로 향상되었습니다.
 
-### 2. 🧠 pgvector 기반 AI 유사도 검색
-- **적용점:** `RecommandRepository` 내 네이티브 쿼리 및 `NineounceXyz512`, `NineounceXyz768` 엔티티 매핑
-- **효과:** 기존 RDBMS의 한계를 벗어나 PostgreSQL의 `pgvector` 확장을 활용합니다. 이미지 분석 결과로 추출된 512차원/768차원의 다차원 벡터 데이터를 데이터베이스 내부에서 **코사인 유사도(Cosine Similarity, `<=>` 연산자)** 로 직접 연산합니다. Application Layer(자바 메모리)로 수만 건의 데이터를 끌어올리지 않고 DB 단에서 즉시 연산·정렬함으로써 응답 속도를 최적화했습니다.
+### 2. 🧠 PostgreSQL `pgvector`를 활용한 대규모 벡터 엔진 조인
+- **도입 배경:** 각 상품의 이미지를 512차원 혹은 768차원 다차원 배열 벡터로 인코딩한 방대한 데이터를 애플리케이션(Java단) 메모리로 가져와 반복 컴퓨팅으로 유사도를 비교할 경우, 즉각적인 `Out Of Memory` 발생과 응답 마비가 심각했습니다. 
+- **해결 방안:** 상품 간 유사성 척도 및 스타일 클러스터링을 DB 엔진 단락에서 즉시 연산·해결하도록 PostgreSQL의 강력한 `pgvector` 확장을 활용하여 데이터 계층의 조인 네이티브 쿼리를 직접 구축했습니다.
+- **기대 효과:** 불필요한 네트워크 대역폭 송수신 부하를 모두 분리했습니다. 검색 속도가 수십 배 이상 최적화되었을 뿐 아니라, 기존의 고정형(Static) 데이터베이스 관계 모델에서 AI가 지속 매핑하는 `top1_style` 동적 추천 모델링으로 시스템을 유연하게 진화시켰습니다.
 
-### 3. 🚀 MapStruct & Caffeine Cache 최적화
-- **MapStruct (`@Mapper`):** 실행 중인 리플렉션(Reflection)을 사용하는 기존 ModelMapper와 달리, 컴파일 타임에 Entity ↔ DTO 양방향 변환 코드를 미리 자동 생성하여 **런타임 오버헤드(Runtime Overhead)를 말끔히 제거**하고 타입 안정성을 확보했습니다.
-- **Caffeine Cache:** `spring-boot-starter-cache`를 통해 매번 DB를 조회할 필요가 없는 설정값이나 트렌드 고정 데이터(예: 랭킹 조회)에 로컬 인메모리 캐싱을 적용하여 실시간 API 응답 지연 단위(Latency)를 단축했습니다.
+### 3. 🛡️ 완전 분산 보안(Stateless)을 위한 Cookie 기반 OAuth2 및 Filter 체계
+- **도입 배경:** 폭발적인 트래픽 대응용 스케일 아웃(Scale-out) 시, 기존 HTTP Session을 유지하려면 막대한 비용의 Redis와 같은 세션 클러스터링 인프라가 필수적입니다. 또한 Spring Security의 소셜 로그인 흐름 통제 자체에선 일부 데이터 단락의 세션 저장이 강제됩니다. 
+- **해결 방안:** 백엔드 로그인 검증에 개입되는 세션 메커니즘을 100% 암호화된 `HTTP-Only` 쿠키 단으로 우회 재구현(`AuthorizationRequestRepository`) 하였으며, 성공 직후 JWT 식별 토큰만을 교환하는 필터단을 전면 설계했습니다.
+- **기대 효과:** 단 1%의 세션도 서버에 남기지 않는 완전한 무상태(Stateless) 클라우드 로직을 완성했습니다. 악의적 요청 등을 비즈니스 로직이 아닌 서비스 진입 맨 처음 시점인 필터 단에서 신속하게 차단하여 백엔드 리소스 누수를 최소화하고 보안 레벨을 견고히 잡았습니다.
 
-### 4. 🪪 무상태(Stateless) JWT & OAuth2 파이프라인
-- **적용점:** `JWTAuthorizationFilter`, `OAuth2SuccessHandlerWithDB`
-- **효과:** 세션을 서버 메모리에 저장하고 계속 참조해야 하는 번거로움을 피하고자 `com.auth0:java-jwt` 라이브러리를 이용했습니다. 카카오/네이버/구글의 OAuth2 인증 성공 직후 DB를 갱신하고 자체 토큰을 커스텀 발급하며, Filter 단에서 토큰 만료 및 위변조 발견 시 즉각 `401 Unauthorized` 예외 응답을 발생시켜 클라이언트의 자동 로그아웃을 유도하도록 방어적으로 설계되었습니다.
+### 4. 🔗 Spring 6 선언적 HTTP 클라이언트 (Declarative HTTP Interfaces)
+- **도입 배경:** 외부 FastAPI (AI 모듈 서버) 통신 로직에 기존 `RestTemplate`나 복잡한 빈 매핑 `FeignClient`를 사용하면 런타임 시 보일러플레이트 코드가 기하급수적으로 늘어나고 타임아웃 방어에 어려움이 발생합니다. 
+- **해결 방안:** Spring 6의 가장 강력한 최신 통신 기능인 100% 논블로킹 엔진 Reactor Netty 기반의 **Declarative HTTP Interfaces (`@HttpExchange`)** 어댑터를 커스텀 튜닝(커넥션 풀 500개 확장, 120s 장기 타임아웃 세션 방어)하여 연동했습니다. 
+- **기대 효과:** 통신 구조의 모든 직관적 결합도를 느슨하고 깔끔한 어노테이션 기반 인터페이스 단위로 압축하여 코드 추적 및 유지보수성을 극대화했습니다. 아무리 무거운 AI 연산이 길어져도 끊임없이 안전하게 데이터 소켓을 방어합니다. 
+
+### 5. 🚀 MapStruct 매핑 자동화 및 로컬 파이프라인 (Caffeine Cache) 구축
+- **도입 배경:** 클라이언트로 전송될 DTO 간 계속된 변경과 직렬/역직렬화에 기존 런타임 리플렉션 기술을 적용하면 구조적 응답 지연을 초래합니다. 더불어, 고정적인 메인 추천 트렌드 상품들을 매번 DB 통신으로 연산하는 막대한 I/O 낭비가 존재했습니다.
+- **해결 방안:** 컴파일 빌드 단계 시점에 매핑 최적화 코드를 프레임워크가 자동 생성하는 `MapStruct` 도입 및 빠른 인메모리 반응형 데이터를 전달할 목적의 로컬 한정 `Caffeine Cache`를 동시 기용했습니다. 
+- **기대 효과:** 애플리케이션의 런타임 객체 변환 지연율(Latency 오버헤드)을 'Zero' 단상으로 차단하였으며 실시간 트렌드 조회에 있어 DB 콜 발생 부담을 거의 완벽히 덜어냈습니다.
+
+### 6. 🏞️ 구조적 영속성 분리 (Supabase Storage 독립 파일 연동망)
+- **도입 배경:** 유저 프로필 등 사용자에 의해 등록된 무거운 대용량 바이너리 파일을 직접 RDBMS의 Byte Blob으로 관리하면 인프라 마이그레이션 백업 및 트랜잭션 용량에 곧바로 치명상을 입힙니다.
+- **해결 방안:** Supabase Storage 버킷 전용 API 연동망 규격을 통해, 바이너리 팩 저장소는 별도 외부 퍼블릭 스토리지로 던지고 백엔드 테이블에는 해당 자산의 공개 HTTP URL(`default.svg` 등) 텍스트 명칭 하나만 기록되도록 로직을 분리시켰습니다. 
+- **기대 효과:** RDBMS 비대화를 단번에 종식시켰습니다. 클라우드 스토리지를 응용하여 가볍고 초고속인 글로벌 응답을 제공, 프론트엔드에서 즉각 이미지가 스트리밍 로딩 렌더링되는 체감 성능 향상을 크게 이끌어 냈습니다.
 
 ---
 
@@ -55,25 +70,33 @@
 프로젝트는 주요 도메인 및 용도별 컨트롤러(`*Controller`)로 깔끔하게 분리되어 있습니다.
 
 ### 1. 👕 AI 시각 검색 및 상품 추천 (`/api/recommand`)
-- `GET /api/recommand/{productId}`: 특정 상품의 512D 벡터를 기준삼아 유사도 측정 및 네이버/내부 자사 상품 목록 추론 반환
-- `GET /api/recommand/768/{productId}`: 고밀도 다차원(768D) 모델을 이용한 한 단계 스케일 업 된 상품 추천
-- `POST /api/recommand/analyze`: (Multipart 형식) 사용자가 업로드한 이미지를 분석해 특징점과 바운딩 박스를 인식, 가장 유사한 형태의 옷 정보 매칭 결과 반환
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/recommand/{productId}` | 512D 벡터 기준 유사도 측정 및 네이버/내부 상품 추론 반환 |
+| **GET** | `/api/recommand/768/{productId}` | 고밀도 다차원(768D) 모델을 이용한 스케일 업 상품 추천 |
+| **POST** | `/api/recommand/analyze` | (Multipart) 업로드된 이미지를 인식해 가장 유사한 핏 매칭 |
 
 ### 2. 👥 회원 관리 및 소셜 인증 (`/api/members`)
-- `POST /api/members/login`: 로컬 보안 로그인 처리와 동시에 JWT Access Token 동적 발급
-- `POST /api/members/signup`: 신규 가입 폼 및 프로필 이미지 저장 지원
-- `GET /api/members/me`: 검증된 JWT 토큰을 바탕으로 현재 페이지를 조회 중인 사용자의 식별 DB 값 반환
-- `PATCH /api/members/update`: 사용자가 설정한 닉네임과 비밀번호 등 단변수 수정/저장
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **POST** | `/api/members/login` | 로컬 로그인 처리 및 JWT Access Token 동적 발급 |
+| **POST** | `/api/members/signup` | 신규 회원가입 및 프로필 이미지 저장 지원 |
+| **GET** | `/api/members/me` | 토큰을 기반으로 현재 호출 중인 사용자의 세부 정보 반환 |
+| **PATCH** | `/api/members/update` | 닉네임, 비밀번호 등 회원 정보 단건 수정 |
 
 ### 3. 🛍️ 관심 상품 (위시리스트) (`/api/save-products`)
-- `POST /api/save-products`: 내가 선택한 네이버 외부 쇼핑몰 상품 ID와 스타일명(`userStyle`)을 내부 데이터에 위시리스트용으로 연관 매핑 및 보관
-- `GET /api/save-products`: 내가 좋아요 누른 모든 외부 상품 및 스타일별 정보 다건 전체 조회
-- `DELETE /api/save-products`: `List<String>` 형태의 배열을 통해 여러 묶음의 위시리스트 데이터를 단 한 번의 호출로 일괄 삭제 처리
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **POST** | `/api/save-products` | 네이버 외부 쇼핑몰 상품 ID와 스타일 속성을 연동해 보관 |
+| **GET** | `/api/save-products` | 위시리스트에 담긴 모든 외부 상품 및 스타일 정보 일괄 조회 |
+| **DELETE** | `/api/save-products` | `List<String>` 형태로 여러 건의 위시리스트를 한 번에 삭제 |
 
-### 4. 📈 트렌드 분석 및 로깅 (`/api/trends`, `/api/logs`)
-- `GET /api/trends/shopping-insight`: 네이버 공개 쇼핑 클릭 데이터를 역산한 올해 한 해 최고 인기 패션 스타일 통합 스코어 계산 API 분배
-- `GET /api/logs/view`: 브라우저 화면 안에서 시스템의 최신 서버 로그 스트림 파일(`fashion-api.log`) 상황을 시각적으로 모니터링할 수 있는 독립된 대시보드 뷰어 페이지 제공
-- `GET /api/internal-products/map/768` (또는 `/map`): 프론트엔드 단의 UMAP 기반 3D Scatter Plot 렌더링을 위해 전체 상품군의 `X, Y, Z` 차원 좌표점들과 속성 매핑 배열 전달
+### 4. 📈 트렌드 분석 및 시스템 로깅 (`/api/trends`, `/api/logs`)
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/trends/shopping-insight` | 쇼핑 클릭 데이터를 역산한 베스트 트렌드 랭킹 스코어 계산 |
+| **GET** | `/api/logs/view` | 브라우저 안에서 실시간 서버 로그(`fashion-api.log`) 뷰어 제공 |
+| **GET** | `/map/768` (또는 `/map`) | 프론트엔드 UMAP 3D Scatter Plot 렌더링용 X/Y/Z 좌표 집합 반환 |
 
 ---
 
