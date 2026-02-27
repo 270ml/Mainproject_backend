@@ -1,7 +1,8 @@
 # Fashion API (NineOunce E-Commerce Backend)
 
-> 패션 이커머스 서비스(**NineOunce**)를 위한 **Spring Boot 기반 백엔드 API 서버**입니다. 
-> AI를 활용한 시각적 검색(Visual Search) 및 추천, 소셜 로그인 기반의 안전한 회원 관리, 트렌드 분석 등 첨단 쇼핑 인사이트 기능을 제공합니다.
+> 패션 이커머스 서비스(**NineOunce**)를 위한 **Spring Boot 3 + Java 21 기반 백엔드 API 서버**입니다.  
+> AI 딥러닝 모델로 추출한 **512/768차원 이미지 벡터**를 활용해 시각적 유사 상품 검색(Visual Search)과 스타일 추천을 제공하며,  
+> **네이버 데이터랩 쇼핑인사이트 API**와 자체 판매 데이터를 결합한 실시간 패션 트렌드 분석, 소셜 로그인(Google·Naver·Kakao) 기반의 무상태 인증 아키텍처를 갖춘 풀스택 백엔드 시스템입니다.
 
 ## 🚀 주요 기술 스택 (Tech Stack)
 
@@ -20,12 +21,22 @@
 - **FastAPI 연동**: <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=FastAPI&logoColor=white"/> Python 기반 외부 분석 서버(포트 8000, 8001) 통신 (512D/768D 벡터 임베딩)
 - **pgvector**: <img src="https://img.shields.io/badge/pgvector-4169E1?style=flat-square&logo=postgresql&logoColor=white"/> 벡터 검색(Vector Similarity Search) 기반 코사인 유사도 연산
 
+### Data & External API
+- **Naver Datalab API**: <img src="https://img.shields.io/badge/Naver-03C75A?style=flat-square&logo=naver&logoColor=white"/> 쇼핑인사이트 API 기반 실시간 패션 트렌드 스코어 산출
+- **Jackson (ObjectMapper)**: <img src="https://img.shields.io/badge/Jackson-000000?style=flat-square&logo=json&logoColor=white"/> 외부 API JSON 응답 파싱 및 직렬화/역직렬화
+
 ### Storage & Utility
-- **Storage**: <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white"/> 회원 프로필 사진 및 원본 분석 이미지 보관
-- **API Docs**: <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=Swagger&logoColor=black"/> API 명세 자동화 및 테스트 UI (`/swagger-ui.html`)
-- **P6Spy**: 개발 환경 실행 쿼리 파라미터 모니터링
-- **MapStruct**: DTO-Entity 간 자동 변환 (컴파일 타임 에러 체크)
-- **Caffeine Cache**: 트렌드 조회 등 성능 최적화용 로컬 인메모리 캐시
+- **Storage**: <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white"/> Supabase Storage — 회원 프로필 사진 및 원본 분석 이미지 보관
+- **API Docs**: <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=Swagger&logoColor=black"/> springdoc-openapi — `@Tag`/`@Operation` 어노테이션으로 API 명세 자동화 및 인터랙티브 테스트 UI (`/swagger-ui.html`)
+- **P6Spy**: <img src="https://img.shields.io/badge/P6Spy-FF6600?style=flat-square&logoColor=white"/> 실행 SQL 및 바인딩 파라미터 실시간 모니터링
+- **MapStruct**: <img src="https://img.shields.io/badge/MapStruct-FF6A00?style=flat-square&logoColor=white"/> MapStruct 1.6 — DTO ↔ Entity 간 컴파일 타임 자동 매핑 (런타임 리플렉션 비용 제거)
+- **Caffeine Cache**: <img src="https://img.shields.io/badge/Caffeine-6DB33F?style=flat-square&logoColor=white"/> 인메모리 로컬 캐시 (10분 TTL, 최대 100 항목) — 트렌드·추천 조회 성능 최적화
+
+### DevOps & Environment
+- **Docker**: <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white"/> 멀티 스테이지 빌드 (JDK → JRE 분리) 기반 경량 컨테이너 배포
+- **spring-dotenv**: <img src="https://img.shields.io/badge/.env-ECD53F?style=flat-square&logo=dotenv&logoColor=black"/> `.env` 파일 자동 로드 — 로컬/Docker/클라우드 환경변수 통합 관리
+- **Lombok**: <img src="https://img.shields.io/badge/Lombok-BC4521?style=flat-square&logoColor=white"/> `@Getter`/`@Builder`/`@RequiredArgsConstructor` 등 보일러플레이트 코드 최소화
+- **Bean Validation**: <img src="https://img.shields.io/badge/Validation-6DB33F?style=flat-square&logo=spring&logoColor=white"/> `spring-boot-starter-validation` — 입력 데이터 검증 자동화
 
 ---
 
@@ -63,40 +74,98 @@
 - **해결 방안:** Supabase Storage 버킷 전용 API 연동망 규격을 통해, 바이너리 팩 저장소는 별도 외부 퍼블릭 스토리지로 던지고 백엔드 테이블에는 해당 자산의 공개 HTTP URL(`default.svg` 등) 텍스트 명칭 하나만 기록되도록 로직을 분리시켰습니다. 
 - **기대 효과:** RDBMS 비대화를 단번에 종식시켰습니다. 클라우드 스토리지를 응용하여 가볍고 초고속인 글로벌 응답을 제공, 프론트엔드에서 즉각 이미지가 스트리밍 로딩 렌더링되는 체감 성능 향상을 크게 이끌어 냈습니다.
 
+### 7. 🐳 Docker 멀티 스테이지 빌드(Multi-stage Build) 및 협업 생태계 최적화
+- **도입 배경:** 소스 코드와 조립 도구(JDK) 전체를 하나의 배포 컨테이너에 우겨넣으면 이미지 용량이 수백 MB 이상 비대해지며, 해커 침입 시 컴파일러가 그대로 노출되는 보안 위협이 뒤따릅니다. 더불어 프론트엔드 팀과의 기민한 병렬 개발을 위해 CORS 정책과 API 명세 동기화의 유연함이 절실했습니다.
+- **해결 방안:** `Dockerfile`을 계층별로 나누어 1단계(Build Stage)에서 무거운 JDK로 소스를 컴파일(`app.jar`)하고, 2단계 최종 컨테이너(Production)에는 가볍고 통제된 **JRE 환경**만 옮겨 담는 **멀티 스테이지 빌드(Multi-stage Build)** 아키텍처를 도입했습니다. 나아가 Swagger(OpenAPI), P6Spy 네이티브 쿼리 추적망을 통합했습니다.
+- **기대 효과:** 최종 릴리즈 도커 컨테이너의 크기를 비약적으로 다이어트시키고 부팅 속도를 최적화함은 물론 운영 환경 공격 벡터를 줄였습니다. 클라이언트(프론트) 개발자는 실시간으로 구동되는 대화형 Swagger 산출물과 방해 없는 API 규격을 통해 지연 없는 즉각적인 프론트-백 연동 통합이 가능해집니다.
+
+### 8. 🔀 CompletableFuture 기반 병렬 벡터 검색 파이프라인
+- **도입 배경:** 사용자가 이미지를 업로드하면 FastAPI로부터 768차원 임베딩 벡터를 수신한 뒤, 이 벡터로 **내부 자체 상품 DB**와 **네이버 외부 상품 DB** 두 곳에서 동시에 유사 상품을 검색해야 합니다. 이 두 검색을 순차적으로 실행하면 총 응답 시간이 두 배로 늘어나는 병목이 발생합니다.
+- **해결 방안:** `RecommandService`에서 `CompletableFuture.supplyAsync()`로 내부 상품 검색과 네이버 상품 검색을 **동시에 비동기 실행**하고, `CompletableFuture.allOf().join()`으로 두 결과가 모두 도착할 때까지만 대기하는 **Fork-Join 병렬 파이프라인**을 구축했습니다.
+- **기대 효과:** 두 개의 독립적인 벡터 유사도 검색이 동시에 수행되므로, 응답 시간이 단일 검색 수준으로 단축됩니다. Java 21 Virtual Threads와 결합하여 수천 건의 동시 분석 요청에서도 스레드 풀 고갈 없이 안정적으로 병렬 처리됩니다.
+
+### 9. 📊 네이버 데이터랩 쇼핑인사이트 API 실시간 연동 및 상대 트렌드 스코어 산출
+- **도입 배경:** 자체 판매 데이터만으로는 전체 패션 시장의 실시간 트렌드 흐름을 파악하기 어렵습니다. 특히 10가지 스타일(트래디셔널, 캐주얼, 스포츠 등) 간의 상대적 인기도를 정량화할 객관적 지표가 필요했습니다.
+- **해결 방안:** `TrendService`에서 **네이버 데이터랩 쇼핑인사이트 API**를 `CompletableFuture` 기반으로 병렬 호출하고, 각 스타일 키워드의 검색 비율(ratio) 합산값을 기준 스타일(페미닌) 대비 **상대적 트렌드 스코어**로 환산하는 독자적인 알고리즘을 구현했습니다. 최종 결과는 퍼센트 비중(`value`)과 표시용 문자열(`percentStr`) 두 가지 포맷으로 프론트엔드에 전달됩니다.
+- **기대 효과:** 단순한 검색량 나열이 아닌, 스타일 간의 **상대적 선호도 비율**을 실시간으로 산출하여 프론트엔드 차트(레이더/도넛)가 곧바로 렌더링할 수 있는 정규화된 데이터를 제공합니다. 외부 빅데이터와 내부 판매 데이터를 결합한 하이브리드 트렌드 분석 체계를 완성했습니다.
+
+### 10. 🎯 Spring Data Interface Projection 및 읽기 전용 트랜잭션 최적화
+- **도입 배경:** 벡터 유사도 검색 결과를 반환할 때, 무거운 JPA Entity 전체를 로딩하면 불필요한 컬럼까지 모두 메모리에 올라가고 Hibernate의 변경 감지(Dirty Checking) 오버헤드도 발생합니다.
+- **해결 방안:** `SimilarProductProjection`이라는 **인터페이스 기반 Projection**을 정의하여, Native Query 결과에서 필요한 6개 필드(`productId`, `title`, `price`, `imageUrl`, `productLink`, `similarityScore`)만 정확하게 추출합니다. 또한 조회 전용 서비스 메서드에는 `@Transactional(readOnly = true)`를 적용하여 Hibernate의 스냅샷 저장·변경 감지를 완전히 비활성화했습니다.
+- **기대 효과:** 불필요한 데이터 전송과 메모리 할당을 원천 차단하여 대규모 벡터 검색 결과 처리 시 GC 부담과 응답 지연을 크게 줄였습니다. 읽기 전용 트랜잭션은 DB 커넥션 레벨에서도 `SET TRANSACTION READ ONLY`를 통해 락(Lock) 경합을 최소화합니다.
+
+
 ---
 
 ## 🔌 시스템 모듈 및 주요 API 명세 (Key Features & Endpoints)
 
-프로젝트는 주요 도메인 및 용도별 컨트롤러(`*Controller`)로 깔끔하게 분리되어 있습니다.
+프로젝트는 주요 도메인 및 용도별 컨트롤러(`*Controller`)로 깔끔하게 분리되어 있습니다. 총 **10개 컨트롤러**, **30여개 엔드포인트**로 구성됩니다.
 
 ### 1. 👕 AI 시각 검색 및 상품 추천 (`/api/recommand`)
 | Method | Endpoint | Description |
 |:---:|---|---|
-| **GET** | `/api/recommand/{productId}` | 512D 벡터 기준 유사도 측정 및 네이버/내부 상품 추론 반환 |
-| **GET** | `/api/recommand/768/{productId}` | 고밀도 다차원(768D) 모델을 이용한 스케일 업 상품 추천 |
-| **POST** | `/api/recommand/analyze` | (Multipart) 업로드된 이미지를 인식해 가장 유사한 핏 매칭 |
+| **GET** | `/api/recommand/{productId}` | 512D 벡터 기준 코사인 유사도 측정 및 네이버/내부 유사 상품 Top 10 반환 |
+| **GET** | `/api/recommand/768/{productId}` | 고밀도 768D 벡터 모델을 이용한 고정밀 유사 상품 추천 |
+| **POST** | `/api/recommand/analyze` | (Multipart) 업로드 이미지 → FastAPI(8000) 512D 분석 → 유사 상품 추천 |
+| **POST** | `/api/recommand/768/analyze` | (Multipart) 업로드 이미지 → FastAPI(8001) 768D 분석 → 내부/네이버 병렬 추천 |
 
 ### 2. 👥 회원 관리 및 소셜 인증 (`/api/members`)
 | Method | Endpoint | Description |
 |:---:|---|---|
-| **POST** | `/api/members/login` | 로컬 로그인 처리 및 JWT Access Token 동적 발급 |
-| **POST** | `/api/members/signup` | 신규 회원가입 및 프로필 이미지 저장 지원 |
-| **GET** | `/api/members/me` | 토큰을 기반으로 현재 호출 중인 사용자의 세부 정보 반환 |
-| **PATCH** | `/api/members/update` | 닉네임, 비밀번호 등 회원 정보 단건 수정 |
+| **POST** | `/api/members/signup` | 신규 회원가입 (Multipart: 아이디, 비밀번호, 닉네임, 프로필 이미지) |
+| **POST** | `/api/members/login` | 로컬 로그인 처리 및 JWT Access Token 발급 |
+| **POST** | `/api/members/logout` | 로그아웃 처리 (서버 세션 무효화) |
+| **GET** | `/api/members/me` | JWT 토큰 기반 현재 로그인 사용자 정보 조회 |
+| **GET** | `/api/members/list` | 전체 회원 목록 조회 (관리자용) |
+| **PATCH** | `/api/members/update` | 닉네임, 비밀번호 등 회원 정보 선택적 수정 |
+| **POST** | `/api/members/profile` | (Multipart) 프로필 이미지 Supabase Storage 업로드 및 회원 정보 갱신 |
+| **DELETE** | `/api/members/withdraw` | 비밀번호 확인 후 회원 탈퇴 처리 |
 
-### 3. 🛍️ 관심 상품 (위시리스트) (`/api/save-products`)
+### 3. 🛍️ 관심 상품 — 위시리스트 (`/api/save-products`)
 | Method | Endpoint | Description |
 |:---:|---|---|
-| **POST** | `/api/save-products` | 네이버 외부 쇼핑몰 상품 ID와 스타일 속성을 연동해 보관 |
-| **GET** | `/api/save-products` | 위시리스트에 담긴 모든 외부 상품 및 스타일 정보 일괄 조회 |
-| **DELETE** | `/api/save-products` | `List<String>` 형태로 여러 건의 위시리스트를 한 번에 삭제 |
+| **POST** | `/api/save-products` | 네이버 상품 ID + 스타일 속성을 관심 목록에 등록 (JWT 필수) |
+| **GET** | `/api/save-products` | 현재 로그인 회원의 관심 상품 전체 조회 |
+| **DELETE** | `/api/save-products` | `List<String>` Body로 여러 건의 관심 상품 일괄 삭제 |
 
-### 4. 📈 트렌드 분석 및 시스템 로깅 (`/api/trends`, `/api/logs`)
+### 4. � 내부 상품 관리 (`/api/products`)
 | Method | Endpoint | Description |
 |:---:|---|---|
-| **GET** | `/api/trends/shopping-insight` | 쇼핑 클릭 데이터를 역산한 베스트 트렌드 랭킹 스코어 계산 |
-| **GET** | `/api/logs/view` | 브라우저 안에서 실시간 서버 로그(`fashion-api.log`) 뷰어 제공 |
-| **GET** | `/map/768` (또는 `/map`) | 프론트엔드 UMAP 3D Scatter Plot 렌더링용 X/Y/Z 좌표 집합 반환 |
+| **GET** | `/api/products/list` | 전체 또는 카테고리별 필터링된 나인온스 상품 목록 조회 |
+| **GET** | `/api/products/detail?productId=` | 특정 상품 ID의 상세 정보 조회 |
+| **GET** | `/api/products/map/512` | 512D UMAP 기반 3D Scatter Plot 렌더링용 X/Y/Z 좌표 반환 |
+| **GET** | `/api/products/map/768` | 768D UMAP 기반 3D Scatter Plot 렌더링용 X/Y/Z 좌표 반환 |
+| **GET** | `/api/products/style-count/512` | 512D 벡터 보유 상품의 스타일별 분포 통계 |
+| **GET** | `/api/products/style-count/768` | 768D 벡터 보유 상품의 스타일별 분포 통계 |
+| **GET** | `/api/products/internal-count` | 나인온스 자체 상품 총 개수 |
+| **GET** | `/api/products/naver-count` | 네이버 크롤링 상품 총 개수 |
+
+### 5. 🌐 네이버 외부 상품 (`/api/naver-products`)
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/naver-products/list` | 네이버 크롤링 데이터 기반 전체 외부 상품 목록 조회 |
+
+### 6. 📈 트렌드 분석 (`/api/trends`)
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/trends/shopping-insight` | 네이버 쇼핑인사이트 API 기반 10대 스타일 실시간 트렌드 스코어 산출 |
+| **GET** | `/api/trends/by-year?year=` | 연도별 월간 스타일 판매량 트렌드 조회 (파라미터 없으면 전체 연도) |
+
+### 7. 💰 판매 통계 (`/api/sales`)
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/sales/rank` | 매장별·기간별 판매 순위 Top 5 조회 (전체/온라인/특정 매장) |
+
+### 8. 🏬 매장 정보 (`/api/store`)
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/store/list` | 등록된 전체 매장(오프라인/온라인) 목록 조회 |
+
+### 9. 📋 시스템 로그 모니터링 (`/api/logs`)
+| Method | Endpoint | Description |
+|:---:|---|---|
+| **GET** | `/api/logs/view` | 브라우저 내장 실시간 서버 로그 대시보드 (HTML 반환) |
+| **GET** | `/api/logs/raw` | 서버 로그 파일 마지막 1000줄 Raw 텍스트 반환 |
 
 ---
 
